@@ -1,11 +1,21 @@
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { SignJWT, jwtVerify } from 'jose'
+import { cookies } from 'next/headers'
 import { sql } from './db'
 
-export type UserRole = 'super_admin' | 'care_home_admin' | 'manager' | 'senior_carer' | 'carer' | 'nurse' | 'domestic' | 'kitchen' | 'maintenance' | 'admin_staff'
+export type UserRole =
+  | 'super_admin'
+  | 'care_home_admin'
+  | 'manager'
+  | 'senior_carer'
+  | 'carer'
+  | 'nurse'
+  | 'domestic'
+  | 'kitchen'
+  | 'maintenance'
+  | 'admin_staff'
 
 export interface DbUser {
   id: string
-  clerk_id: string
   care_home_id: string | null
   email: string
   first_name: string
@@ -16,114 +26,125 @@ export interface DbUser {
   department: string | null
   is_active: boolean
   is_verified: boolean
+  password_hash: string | null
 }
 
-// Get the current user from the database using Clerk auth
-export async function getCurrentUser(): Promise<DbUser | null> {
-  const { userId } = await auth()
-  
-  if (!userId) {
-    return null
-  }
+export interface SessionPayload {
+  userId: string
+  email: string
+  role: UserRole
+  careHomeId: string | null
+  iat?: number
+  exp?: number
+}
 
+const SESSION_COOKIE = 'session'
+const SESSION_DURATION_SECONDS = 7 * 24 * 60 * 60 // 7 days
+
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET
+  if (!secret) throw new Error('JWT_SECRET environment variable is not set')
+  return new TextEncoder().encode(secret)
+}
+
+/**
+ * Signs a session payload into a JWT using HS256.
+ */
+export async function signSession(payload: SessionPayload): Promise<string> {
+  const secret = getJwtSecret()
+  return new SignJWT({ ...payload })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(`${SESSION_DURATION_SECONDS}s`)
+    .sign(secret)
+}
+
+/**
+ * Verifies a JWT session token. Returns the decoded payload or null on any error.
+ */
+export async function verifySession(token: string): Promise<SessionPayload | null> {
   try {
-    const users = await sql`
-      SELECT * FROM users WHERE clerk_id = ${userId} AND is_active = true
-    `
-    return users[0] as DbUser || null
+    const secret = getJwtSecret()
+    const { payload } = await jwtVerify(token, secret)
+    return payload as unknown as SessionPayload
   } catch {
     return null
   }
 }
 
-// Check if user has required role
+/**
+ * Reads the session cookie and returns the current authenticated user from the DB,
+ * or null if unauthenticated / user not found.
+ */
+export async function getCurrentUser(request?: Request): Promise<DbUser | null> {
+  let token: string | undefined
+
+  if (request) {
+    // Edge runtime path (middleware / API routes)
+    const cookieHeader = request.headers.get('cookie') ?? ''
+    const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE}=([^;]+)`))
+    token = match?.[1]
+  } else {
+    // Server component path
+    const cookieStore = await cookies()
+    token = cookieStore.get(SESSION_COOKIE)?.value
+  }
+
+  if (!token) return null
+
+  const payload = await verifySession(token)
+  if (!payload?.userId) return null
+
+  try {
+    const rows = await sql`
+      SELECT * FROM users WHERE id = ${payload.userId} AND is_active = true LIMIT 1
+    `
+    return (rows[0] as DbUser) ?? null
+  } catch {
+    return null
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Role helpers
+// ---------------------------------------------------------------------------
+
 export function hasRole(user: DbUser | null, allowedRoles: UserRole[]): boolean {
   if (!user) return false
   return allowedRoles.includes(user.role)
 }
 
-// Check if user is a super admin
 export function isSuperAdmin(user: DbUser | null): boolean {
   return hasRole(user, ['super_admin'])
 }
 
-// Check if user is a care home admin or higher
 export function isCareHomeAdmin(user: DbUser | null): boolean {
   return hasRole(user, ['super_admin', 'care_home_admin', 'manager'])
 }
 
-// Check if user is staff (non-admin)
 export function isStaff(user: DbUser | null): boolean {
-  return hasRole(user, ['senior_carer', 'carer', 'nurse', 'domestic', 'kitchen', 'maintenance', 'admin_staff'])
+  return hasRole(user, [
+    'senior_carer',
+    'carer',
+    'nurse',
+    'domestic',
+    'kitchen',
+    'maintenance',
+    'admin_staff',
+  ])
 }
 
-// Get user's care home ID (for multi-tenant queries)
-export async function getUserCareHomeId(): Promise<string | null> {
-  const user = await getCurrentUser()
-  return user?.care_home_id || null
-}
-
-// Sync Clerk user with database
-export async function syncUserWithDatabase(clerkUserId: string): Promise<DbUser | null> {
-  const clerkUser = await currentUser()
-  
-  if (!clerkUser) return null
-
-  const email = clerkUser.emailAddresses[0]?.emailAddress
-  if (!email) return null
-
-  // Check if user exists
-  const existingUsers = await sql`
-    SELECT * FROM users WHERE clerk_id = ${clerkUserId}
-  `
-
-  if (existingUsers.length > 0) {
-    // Update last login
-    await sql`
-      UPDATE users SET last_login_at = NOW() WHERE clerk_id = ${clerkUserId}
-    `
-    return existingUsers[0] as DbUser
+/**
+ * Returns the appropriate dashboard redirect path for a given role.
+ */
+export function getRedirectForRole(role: UserRole): string {
+  switch (role) {
+    case 'super_admin':
+      return '/dashboard'
+    case 'care_home_admin':
+    case 'manager':
+      return '/dashboard'
+    default:
+      return '/dashboard'
   }
-
-  // User doesn't exist - they need to be invited by an admin
-  return null
-}
-
-// Create a new user (admin only - for invitation flow)
-export async function createUser(data: {
-  email: string
-  firstName: string
-  lastName: string
-  role: UserRole
-  careHomeId: string | null
-  phone?: string
-  jobTitle?: string
-  department?: string
-  hourlyRate?: number
-  contractHours?: number
-  contractType?: string
-}): Promise<DbUser> {
-  const result = await sql`
-    INSERT INTO users (
-      email, first_name, last_name, role, care_home_id, 
-      phone, job_title, department, hourly_rate, contract_hours, contract_type
-    ) VALUES (
-      ${data.email}, ${data.firstName}, ${data.lastName}, ${data.role}, ${data.careHomeId},
-      ${data.phone || null}, ${data.jobTitle || null}, ${data.department || null}, 
-      ${data.hourlyRate || null}, ${data.contractHours || null}, ${data.contractType || null}
-    )
-    RETURNING *
-  `
-  return result[0] as DbUser
-}
-
-// Link Clerk user to database user after sign-in
-export async function linkClerkUser(clerkUserId: string, email: string): Promise<DbUser | null> {
-  const result = await sql`
-    UPDATE users 
-    SET clerk_id = ${clerkUserId}, is_verified = true, last_login_at = NOW()
-    WHERE email = ${email} AND clerk_id IS NULL
-    RETURNING *
-  `
-  return result[0] as DbUser || null
 }

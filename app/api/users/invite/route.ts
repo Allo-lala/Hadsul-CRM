@@ -1,70 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth, clerkClient } from '@clerk/nextjs/server'
+import { getCurrentUser, isCareHomeAdmin } from '@/lib/auth'
+import { createPasswordResetToken } from '@/lib/tokens'
+import { sendWelcomeEmail } from '@/lib/email'
 import { sql } from '@/lib/db'
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth()
-    
-    if (!userId) {
+    const currentUser = await getCurrentUser(req)
+
+    if (!currentUser) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check if user has admin permissions
-    const adminUser = await sql`
-      SELECT * FROM users 
-      WHERE clerk_id = ${userId} 
-      AND role IN ('super_admin', 'care_home_admin', 'manager')
-      AND is_active = true
-    `
-
-    if (adminUser.length === 0) {
+    if (!isCareHomeAdmin(currentUser)) {
       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
     }
 
     const body = await req.json()
-    const { 
-      email, 
-      firstName, 
-      lastName, 
-      role, 
-      careHomeId, 
-      phone, 
+    const {
+      email,
+      firstName,
+      lastName,
+      role,
+      careHomeId,
+      phone,
       jobTitle,
       department,
       hourlyRate,
       contractHours,
-      contractType 
+      contractType,
     } = body
 
-    // Validate required fields
     if (!email || !firstName || !lastName || !role) {
-      return NextResponse.json(
-        { error: 'Missing required fields' }, 
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // Check if user already exists
-    const existingUser = await sql`
-      SELECT * FROM users WHERE email = ${email}
-    `
+    // Super admins can assign any care home; care home admins are restricted to their own
+    const assignedCareHomeId =
+      currentUser.role === 'super_admin'
+        ? careHomeId || null
+        : currentUser.care_home_id
 
+    // Check for duplicate email
+    const existingUser = await sql`
+      SELECT id FROM users WHERE email = ${email}
+    `
     if (existingUser.length > 0) {
       return NextResponse.json(
-        { error: 'A user with this email already exists' }, 
+        { error: 'A user with this email already exists' },
         { status: 409 }
       )
     }
 
-    // Create user in database (without clerk_id - will be linked on first sign-in)
+    // Create user record with no password hash and is_verified = false
     const newUser = await sql`
       INSERT INTO users (
         email, first_name, last_name, role, care_home_id,
         phone, job_title, department, hourly_rate, contract_hours, contract_type,
         is_active, is_verified
       ) VALUES (
-        ${email}, ${firstName}, ${lastName}, ${role}, ${careHomeId || null},
+        ${email}, ${firstName}, ${lastName}, ${role}, ${assignedCareHomeId},
         ${phone || null}, ${jobTitle || null}, ${department || null},
         ${hourlyRate || null}, ${contractHours || null}, ${contractType || null},
         true, false
@@ -72,41 +67,18 @@ export async function POST(req: NextRequest) {
       RETURNING *
     `
 
-    // Create Clerk invitation
-    const client = await clerkClient()
-    const invitation = await client.invitations.createInvitation({
-      emailAddress: email,
-      redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/sign-in`,
-      publicMetadata: {
-        dbUserId: newUser[0].id,
-        role: role,
-        careHomeId: careHomeId,
-      },
-    })
+    const created = newUser[0]
 
-    // Log the action
-    await sql`
-      INSERT INTO audit_logs (care_home_id, user_id, action, entity_type, entity_id, new_values)
-      VALUES (
-        ${careHomeId || null}, 
-        (SELECT id FROM users WHERE clerk_id = ${userId}),
-        'user_invited',
-        'user',
-        ${newUser[0].id}::uuid,
-        ${JSON.stringify({ email, firstName, lastName, role })}::jsonb
-      )
-    `
+    // Generate a 24-hour setup token and send welcome email
+    const rawToken = await createPasswordResetToken(created.id, 24)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const setupLink = `${appUrl}/reset-password?token=${rawToken}`
 
-    return NextResponse.json({
-      success: true,
-      user: newUser[0],
-      invitationId: invitation.id,
-    })
+    await sendWelcomeEmail(email, `${firstName} ${lastName}`, setupLink)
+
+    return NextResponse.json({ success: true, user: created })
   } catch (error) {
     console.error('Error inviting user:', error)
-    return NextResponse.json(
-      { error: 'Failed to invite user' }, 
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to invite user' }, { status: 500 })
   }
 }
