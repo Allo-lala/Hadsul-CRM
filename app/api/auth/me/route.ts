@@ -8,6 +8,19 @@ export async function GET(request: NextRequest) {
   const user = await getCurrentUser(request)
   if (!user) return unauthorized()
 
+  const db = getDb()
+
+  // Fetch care home name if user belongs to one
+  let careHomeName: string | null = null
+  if (user.care_home_id) {
+    try {
+      const rows = await db`SELECT name FROM care_homes WHERE id = ${user.care_home_id} LIMIT 1`
+      careHomeName = (rows[0] as { name: string } | undefined)?.name ?? null
+    } catch {
+      // non-fatal
+    }
+  }
+
   return NextResponse.json({
     id: user.id,
     email: user.email,
@@ -15,6 +28,7 @@ export async function GET(request: NextRequest) {
     last_name: user.last_name,
     role: user.role,
     care_home_id: user.care_home_id,
+    care_home_name: careHomeName,
     phone: user.phone,
     job_title: user.job_title,
     department: user.department,

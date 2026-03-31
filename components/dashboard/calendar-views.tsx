@@ -302,12 +302,13 @@ export function WeekView({ anchor, today, eventsByDate, loading, onSelectDate, o
 
 // ─── DayView ──────────────────────────────────────────────────────────────────
 
-export function DayView({ date, today, events, loading, onAddEvent, onDelete, deleting }: {
+export function DayView({ date, today, events, loading, onAddEvent, onDelete, onEdit, deleting }: {
   date: Date; today: Date
   events: CalendarEvent[]
   loading: boolean
   onAddEvent: () => void
   onDelete: (id: string) => void
+  onEdit: (ev: CalendarEvent) => void
   deleting: string | null
 }) {
   const isToday = sameDay(date, today)
@@ -337,7 +338,11 @@ export function DayView({ date, today, events, loading, onAddEvent, onDelete, de
         ) : (
           <div className="space-y-3">
             {events.map(ev => (
-              <div key={ev.id} className={cn("flex items-start gap-4 rounded-lg border p-4", EVENT_STYLES[ev.type] ?? EVENT_STYLES.personal)}>
+              <div
+                key={ev.id}
+                onClick={() => onEdit(ev)}
+                className={cn("flex items-start gap-4 rounded-lg border p-4 cursor-pointer hover:shadow-md transition-shadow", EVENT_STYLES[ev.type] ?? EVENT_STYLES.personal)}
+              >
                 <div className="flex-1 space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className={cn("text-xs capitalize", EVENT_STYLES[ev.type] ?? EVENT_STYLES.personal)}>
@@ -360,12 +365,10 @@ export function DayView({ date, today, events, loading, onAddEvent, onDelete, de
                   {ev.description && <p className="text-sm opacity-80">{ev.description}</p>}
                 </div>
                 <button
-                  onClick={() => onDelete(ev.id)}
+                  onClick={e => { e.stopPropagation(); onDelete(ev.id) }}
                   className="shrink-0 opacity-50 hover:opacity-100 transition-opacity"
                 >
-                  {deleting === ev.id
-                    ? <Loader2 className="h-4 w-4 animate-spin" />
-                    : <Trash2 className="h-4 w-4" />}
+                  {deleting === ev.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                 </button>
               </div>
             ))}
@@ -378,10 +381,11 @@ export function DayView({ date, today, events, loading, onAddEvent, onDelete, de
 
 // ─── ScheduleView ─────────────────────────────────────────────────────────────
 
-export function ScheduleView({ events, loading, onDelete, deleting, onAddEvent }: {
+export function ScheduleView({ events, loading, onDelete, onEdit, deleting, onAddEvent }: {
   events: CalendarEvent[]
   loading: boolean
   onDelete: (id: string) => void
+  onEdit: (ev: CalendarEvent) => void
   deleting: string | null
   onAddEvent: () => void
 }) {
@@ -425,7 +429,11 @@ export function ScheduleView({ events, loading, onDelete, deleting, onAddEvent }
                   </p>
                   <div className="space-y-2">
                     {dayEvents.map(ev => (
-                      <div key={ev.id} className={cn("flex items-center gap-3 rounded-lg border px-4 py-3", EVENT_STYLES[ev.type] ?? EVENT_STYLES.personal)}>
+                      <div
+                        key={ev.id}
+                        onClick={() => onEdit(ev)}
+                        className={cn("flex items-center gap-3 rounded-lg border px-4 py-3 cursor-pointer hover:shadow-md transition-shadow", EVENT_STYLES[ev.type] ?? EVENT_STYLES.personal)}
+                      >
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium truncate">{ev.title}</span>
@@ -448,7 +456,7 @@ export function ScheduleView({ events, loading, onDelete, deleting, onAddEvent }
                             )}
                           </div>
                         </div>
-                        <button onClick={() => onDelete(ev.id)} className="shrink-0 opacity-50 hover:opacity-100">
+                        <button onClick={e => { e.stopPropagation(); onDelete(ev.id) }} className="shrink-0 opacity-50 hover:opacity-100">
                           {deleting === ev.id
                             ? <Loader2 className="h-4 w-4 animate-spin" />
                             : <Trash2 className="h-4 w-4" />}

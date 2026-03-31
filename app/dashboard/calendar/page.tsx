@@ -12,7 +12,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
-import { ChevronLeft, ChevronRight, Plus, Bell, Loader2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, Plus, Bell, Loader2, Pencil } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { apiRequest } from "@/lib/api"
 import type { CalendarEvent } from "@/app/api/calendar/route"
@@ -51,6 +51,15 @@ export default function CalendarPage() {
   const [addError, setAddError] = useState<string | null>(null)
   const [addSaving, setAddSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+
+  // Edit state
+  const [editEvent, setEditEvent] = useState<CalendarEvent | null>(null)
+  const [editForm, setEditForm] = useState({
+    title: "", description: "", event_date: "", start_time: "", end_time: "",
+    type: "personal", reminder_minutes: "", is_all_day: false,
+  })
+  const [editError, setEditError] = useState<string | null>(null)
+  const [editSaving, setEditSaving] = useState(false)
 
   const fetchEvents = useCallback(async (year: number, month: number, wide = false) => {
     setLoading(true)
@@ -147,6 +156,51 @@ export default function CalendarPage() {
     setDeleting(null)
   }
 
+  function openEdit(ev: CalendarEvent) {
+    setEditEvent(ev)
+    setEditForm({
+      title: ev.title,
+      description: ev.description ?? "",
+      event_date: ev.event_date.slice(0, 10),
+      start_time: ev.start_time?.slice(0, 5) ?? "",
+      end_time: ev.end_time?.slice(0, 5) ?? "",
+      type: ev.type,
+      reminder_minutes: ev.reminder_minutes != null ? String(ev.reminder_minutes) : "none",
+      is_all_day: ev.is_all_day,
+    })
+    setEditError(null)
+  }
+
+  async function handleEditEvent() {
+    if (!editEvent) return
+    if (!editForm.title.trim()) { setEditError("Title is required"); return }
+    setEditSaving(true)
+    setEditError(null)
+    const payload: Record<string, unknown> = {
+      title: editForm.title.trim(),
+      event_date: editForm.event_date,
+      type: editForm.type,
+      is_all_day: editForm.is_all_day,
+      description: editForm.description.trim() || null,
+    }
+    if (!editForm.is_all_day && editForm.start_time) payload.start_time = editForm.start_time
+    if (!editForm.is_all_day && editForm.end_time) payload.end_time = editForm.end_time
+    if (editForm.reminder_minutes !== "" && editForm.reminder_minutes !== "none")
+      payload.reminder_minutes = Number(editForm.reminder_minutes)
+    else payload.reminder_minutes = null
+
+    const { data, error } = await apiRequest<CalendarEvent>(`/api/calendar?id=${editEvent.id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    })
+    setEditSaving(false)
+    if (error) { setEditError(error); return }
+    if (data) {
+      setEvents(prev => prev.map(e => e.id === editEvent.id ? data : e))
+      setEditEvent(null)
+    }
+  }
+
   function getTitle(): string {
     if (view === "month" || view === "year") return `${MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`
     if (view === "week") {
@@ -235,6 +289,7 @@ export default function CalendarPage() {
             loading={loading}
             onAddEvent={() => openAdd(anchor)}
             onDelete={handleDelete}
+            onEdit={openEdit}
             deleting={deleting}
           />
         )}
@@ -243,6 +298,7 @@ export default function CalendarPage() {
             events={events}
             loading={loading}
             onDelete={handleDelete}
+            onEdit={openEdit}
             deleting={deleting}
             onAddEvent={openAdd}
           />
@@ -343,6 +399,106 @@ export default function CalendarPage() {
             <Button onClick={handleAddEvent} disabled={addSaving}>
               {addSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Save Event
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Event Dialog */}
+      <Dialog open={!!editEvent} onOpenChange={open => { if (!open) setEditEvent(null) }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-4 w-4" /> Edit Event
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {editError && <p className="text-sm text-destructive">{editError}</p>}
+
+            <div className="space-y-1">
+              <Label>Title *</Label>
+              <Input
+                value={editForm.title}
+                onChange={e => setEditForm({...editForm, title: e.target.value})}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Date *</Label>
+                <Input
+                  type="date"
+                  value={editForm.event_date}
+                  onChange={e => setEditForm({...editForm, event_date: e.target.value})}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Type</Label>
+                <Select value={editForm.type} onValueChange={v => setEditForm({...editForm, type: v})}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["personal","reminder","shift","meeting","review","training","inspection"].map(t => (
+                      <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="edit_all_day"
+                checked={editForm.is_all_day}
+                onChange={e => setEditForm({...editForm, is_all_day: e.target.checked})}
+                className="h-4 w-4 rounded border-border"
+              />
+              <Label htmlFor="edit_all_day" className="cursor-pointer">All day</Label>
+            </div>
+
+            {!editForm.is_all_day && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Start Time</Label>
+                  <Input type="time" value={editForm.start_time} onChange={e => setEditForm({...editForm, start_time: e.target.value})} />
+                </div>
+                <div className="space-y-1">
+                  <Label>End Time</Label>
+                  <Input type="time" value={editForm.end_time} onChange={e => setEditForm({...editForm, end_time: e.target.value})} />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <Label className="flex items-center gap-1.5">
+                <Bell className="h-3.5 w-3.5" /> Reminder
+              </Label>
+              <Select value={editForm.reminder_minutes} onValueChange={v => setEditForm({...editForm, reminder_minutes: v})}>
+                <SelectTrigger><SelectValue placeholder="No reminder" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No reminder</SelectItem>
+                  {REMINDER_OPTIONS.map(o => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label>Notes</Label>
+              <Textarea
+                value={editForm.description}
+                onChange={e => setEditForm({...editForm, description: e.target.value})}
+                placeholder="Optional notes…"
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditEvent(null)} disabled={editSaving}>Cancel</Button>
+            <Button onClick={handleEditEvent} disabled={editSaving}>
+              {editSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Changes
             </Button>
           </DialogFooter>
         </DialogContent>

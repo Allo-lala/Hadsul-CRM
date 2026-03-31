@@ -150,3 +150,46 @@ export async function DELETE(request: NextRequest) {
     return serverError()
   }
 }
+
+// PATCH /api/calendar?id=xxx
+export async function PATCH(request: NextRequest) {
+  const user = await getCurrentUser(request)
+  if (!user) return unauthorized()
+
+  const id = new URL(request.url).searchParams.get('id')
+  if (!id) return validationError({ id: 'Event id is required' })
+
+  let body: Record<string, unknown>
+  try {
+    body = await request.json()
+  } catch {
+    return validationError({ body: 'Invalid JSON' })
+  }
+
+  const sql = getDb()
+
+  try {
+    const rows = await sql`
+      UPDATE calendar_events SET
+        title            = COALESCE(${body.title as string | undefined ?? null}, title),
+        description      = COALESCE(${body.description as string | undefined ?? null}, description),
+        event_date       = COALESCE(${body.event_date as string | undefined ?? null}::date, event_date),
+        start_time       = COALESCE(${body.start_time as string | undefined ?? null}::time, start_time),
+        end_time         = COALESCE(${body.end_time as string | undefined ?? null}::time, end_time),
+        type             = COALESCE(${body.type as string | undefined ?? null}, type),
+        reminder_minutes = COALESCE(${body.reminder_minutes != null ? Number(body.reminder_minutes) : null}, reminder_minutes),
+        is_all_day       = COALESCE(${body.is_all_day != null ? Boolean(body.is_all_day) : null}, is_all_day)
+      WHERE id = ${id} AND user_id = ${user.id}
+      RETURNING
+        id, user_id, care_home_id, title, description,
+        to_char(event_date, 'YYYY-MM-DD') AS event_date,
+        start_time::text, end_time::text, type,
+        reminder_minutes, is_all_day, created_by
+    `
+    if (rows.length === 0) return NextResponse.json({ error: 'Event not found' }, { status: 404 })
+    return NextResponse.json(rows[0] as CalendarEvent)
+  } catch (err) {
+    console.error('[PATCH /api/calendar]', err)
+    return serverError()
+  }
+}
