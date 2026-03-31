@@ -2,35 +2,30 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
   Users,
   Calendar,
   Clock,
-  ClipboardList,
   FileText,
-  Settings,
-  MessageSquare,
   Building2,
   ChevronDown,
   ChevronRight,
-  Palmtree,
-  Shield,
   BarChart3,
-  Wrench,
-  RefreshCw,
-  BookOpen,
   Bell,
   HelpCircle,
   LogOut,
   Menu,
   X,
+  User,
+  Shield,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import type { UserRole } from "@/lib/types"
 
 interface NavItem {
   title: string
@@ -39,62 +34,88 @@ interface NavItem {
   children?: { title: string; href: string }[]
 }
 
-const navItems: NavItem[] = [
-  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Inbox", href: "/dashboard/inbox", icon: MessageSquare },
-  { title: "Calendar", href: "/dashboard/calendar", icon: Calendar },
-  { title: "Daily Tasks", href: "/dashboard/tasks", icon: ClipboardList },
-  { title: "Handover", href: "/dashboard/handover", icon: RefreshCw },
-  { title: "Maintenance", href: "/dashboard/maintenance", icon: Wrench },
-  {
-    title: "Setup",
-    icon: Settings,
-    children: [
-      { title: "Care Plans", href: "/dashboard/setup/care-plans" },
-      { title: "Pre-Admission", href: "/dashboard/setup/pre-admission" },
-      { title: "Business Alerts", href: "/dashboard/setup/alerts" },
-      { title: "Company Profile", href: "/dashboard/setup/company" },
-      { title: "Staff", href: "/dashboard/setup/staff" },
-    ],
-  },
-  {
-    title: "Reports",
-    icon: BarChart3,
-    children: [
-      { title: "Service Users", href: "/dashboard/reports/service-users" },
-      { title: "Incidents", href: "/dashboard/reports/incidents" },
-      { title: "Temperatures", href: "/dashboard/reports/temperatures" },
-      { title: "CQC Health Check", href: "/dashboard/reports/cqc" },
-      { title: "Staff Reports", href: "/dashboard/reports/staff" },
-      { title: "Finance", href: "/dashboard/reports/finance" },
-    ],
-  },
-  {
-    title: "Rota",
-    icon: Calendar,
-    children: [
-      { title: "My Rota", href: "/dashboard/rota/my-rota" },
-      { title: "Manage Rota", href: "/dashboard/rota/manage" },
-      { title: "Shift Auditor", href: "/dashboard/rota/auditor" },
-    ],
-  },
-  { title: "Holidays", href: "/dashboard/holidays", icon: Palmtree },
-  { title: "Clock In/Out", href: "/dashboard/clock", icon: Clock },
-  { title: "Staff", href: "/dashboard/staff", icon: Users },
-  { title: "CQC Inspection", href: "/dashboard/cqc", icon: Shield },
-  { title: "Policy & Procedures", href: "/dashboard/policies", icon: BookOpen },
-]
+// Role-scoped nav definitions (Requirements 8.1, 8.2, 8.3)
+function getNavItems(role: UserRole): NavItem[] {
+  if (role === "super_admin") {
+    return [
+      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Care Homes", href: "/dashboard/care-homes", icon: Building2 },
+      { title: "All Staff", href: "/dashboard/staff", icon: Users },
+      {
+        title: "Platform Reports",
+        icon: BarChart3,
+        children: [
+          { title: "Staff Reports", href: "/dashboard/reports/staff" },
+          { title: "Finance", href: "/dashboard/reports/finance" },
+        ],
+      },
+      { title: "User Management", href: "/dashboard/users", icon: Shield },
+    ]
+  }
 
-const bottomNavItems: NavItem[] = [
-  { title: "Updates & News", href: "/dashboard/updates", icon: Bell },
-  { title: "Help & Support", href: "/dashboard/support", icon: HelpCircle },
-]
+  if (role === "care_home_admin" || role === "manager") {
+    return [
+      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { title: "Staff", href: "/dashboard/staff", icon: Users },
+      { title: "Clock In/Out", href: "/dashboard/clock", icon: Clock },
+      {
+        title: "Rota",
+        icon: Calendar,
+        children: [
+          { title: "Manage Rota", href: "/dashboard/rota/manage" },
+        ],
+      },
+      {
+        title: "Reports",
+        icon: BarChart3,
+        children: [
+          { title: "Staff Reports", href: "/dashboard/reports/staff" },
+          { title: "Finance", href: "/dashboard/reports/finance" },
+        ],
+      },
+    ]
+  }
 
-function NavItemComponent({ item, isCollapsed }: { item: NavItem; isCollapsed: boolean }) {
+  // Staff / all other roles (Requirements 8.3)
+  return [
+    { title: "Clock In/Out", href: "/dashboard/clock", icon: Clock },
+    { title: "My Schedule", href: "/dashboard/calendar", icon: Calendar },
+    { title: "My Profile", href: "/dashboard/profile", icon: User },
+  ]
+}
+
+function getRoleLabel(role: UserRole): string {
+  switch (role) {
+    case "super_admin": return "Platform Admin"
+    case "care_home_admin": return "Care Home Admin"
+    case "manager": return "Manager"
+    case "senior_carer": return "Senior Carer"
+    case "carer": return "Carer"
+    case "nurse": return "Nurse"
+    case "domestic": return "Domestic"
+    case "kitchen": return "Kitchen"
+    case "maintenance": return "Maintenance"
+    case "admin_staff": return "Admin Staff"
+    default: return role
+  }
+}
+
+function getInitials(firstName: string, lastName: string): string {
+  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+}
+
+interface NavItemComponentProps {
+  item: NavItem
+  isCollapsed: boolean
+}
+
+function NavItemComponent({ item, isCollapsed }: NavItemComponentProps) {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const hasChildren = item.children && item.children.length > 0
-  const isActive = item.href ? pathname === item.href : item.children?.some((child) => pathname === child.href)
+  const isActive = item.href
+    ? pathname === item.href
+    : item.children?.some((child) => pathname === child.href)
 
   if (hasChildren) {
     return (
@@ -151,9 +172,38 @@ function NavItemComponent({ item, isCollapsed }: { item: NavItem; isCollapsed: b
   )
 }
 
-export function Sidebar() {
+export interface SidebarUserProps {
+  firstName: string
+  lastName: string
+  role: UserRole
+  careHomeName: string | null
+}
+
+interface SidebarProps {
+  user: SidebarUserProps
+}
+
+export function Sidebar({ user }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const router = useRouter()
+
+  const navItems = getNavItems(user.role)
+  const roleLabel = getRoleLabel(user.role)
+  // Requirement 8.4: show care home name or "Platform Admin" for super_admin
+  const contextLabel = user.role === "super_admin" ? "Platform Admin" : (user.careHomeName ?? roleLabel)
+  const initials = getInitials(user.firstName, user.lastName)
+  const fullName = `${user.firstName} ${user.lastName}`
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" })
+    router.push("/login")
+  }
+
+  const bottomNavItems: NavItem[] = [
+    { title: "Updates & News", href: "/dashboard/updates", icon: Bell },
+    { title: "Help & Support", href: "/dashboard/support", icon: HelpCircle },
+  ]
 
   return (
     <>
@@ -220,25 +270,32 @@ export function Sidebar() {
             ))}
           </nav>
 
-          {/* User Profile */}
+          {/* User Profile (Requirement 8.4) */}
           <div
             className={cn(
-              "flex items-center gap-3 rounded-lg p-2 hover:bg-sidebar-accent",
+              "flex items-center gap-3 rounded-lg p-2",
               isCollapsed && "justify-center"
             )}
           >
-            <Avatar className="h-9 w-9">
-              <AvatarImage src="/placeholder.svg?height=36&width=36" alt="User" />
-              <AvatarFallback className="bg-primary text-primary-foreground">JD</AvatarFallback>
+            <Avatar className="h-9 w-9 shrink-0">
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                {initials}
+              </AvatarFallback>
             </Avatar>
             {!isCollapsed && (
               <div className="flex-1 overflow-hidden">
-                <p className="truncate text-sm font-medium text-sidebar-foreground">John Doe</p>
-                <p className="truncate text-xs text-sidebar-foreground/60">Care Home Admin</p>
+                <p className="truncate text-sm font-medium text-sidebar-foreground">{fullName}</p>
+                <p className="truncate text-xs text-sidebar-foreground/60">{contextLabel}</p>
               </div>
             )}
             {!isCollapsed && (
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-sidebar-foreground/70">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 shrink-0 text-sidebar-foreground/70 hover:text-destructive"
+                onClick={handleLogout}
+                title="Log out"
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             )}

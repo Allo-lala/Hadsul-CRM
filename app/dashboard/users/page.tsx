@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Header } from "@/components/dashboard/header"
-import { Sidebar } from "@/components/dashboard/sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -144,7 +143,6 @@ const roleColors: Record<string, string> = {
 }
 
 export default function UsersPage() {
-  const [isCollapsed, setIsCollapsed] = useState(false)
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [roleFilter, setRoleFilter] = useState<string>("all")
@@ -194,13 +192,10 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+    <div className="min-h-screen">
+      <Header title="User Management" subtitle="Invite and manage system users" />
       
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title="User Management" subtitle="Invite and manage system users" />
-        
-        <main className="flex-1 overflow-y-auto p-6">
+      <main className="p-6">
           {/* Stats Cards */}
           <div className="grid gap-4 md:grid-cols-4 mb-6">
             <Card className="bg-card border-border">
@@ -536,7 +531,6 @@ export default function UsersPage() {
             </CardContent>
           </Card>
         </main>
-      </div>
     </div>
   )
 }

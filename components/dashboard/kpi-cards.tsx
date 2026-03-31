@@ -5,13 +5,10 @@ import { cn } from "@/lib/utils"
 import {
   Users,
   Clock,
-  ClipboardList,
-  Calendar,
   Building2,
   AlertTriangle,
   TrendingUp,
   TrendingDown,
-  Cake,
 } from "lucide-react"
 
 interface KPICardProps {
@@ -76,67 +73,109 @@ function KPICard({ title, value, subtitle, icon: Icon, trend, variant = "default
   )
 }
 
-export function KPICards() {
-  const kpiData: KPICardProps[] = [
-    {
-      title: "Unassigned Shifts",
-      value: 12,
-      subtitle: "Next 7 days",
-      icon: Calendar,
-      variant: "warning",
-    },
-    {
-      title: "Late Clock-ins",
-      value: 3,
-      subtitle: "Today",
-      icon: Clock,
-      variant: "danger",
-    },
-    {
-      title: "Tasks Overdue",
-      value: 7,
-      subtitle: "Action required",
-      icon: ClipboardList,
-      variant: "danger",
-    },
-    {
-      title: "Upcoming Birthdays",
-      value: 4,
-      subtitle: "This week",
-      icon: Cake,
-      variant: "default",
-    },
-    {
-      title: "Reviews Due",
-      value: 8,
-      subtitle: "Next 7 days",
-      icon: AlertTriangle,
-      variant: "warning",
-    },
-    {
-      title: "Weekly Rota Hours",
-      value: "2,847",
-      subtitle: "Hours scheduled",
-      icon: Calendar,
-      trend: { value: 5.2, isPositive: true },
-      variant: "default",
-    },
-    {
-      title: "Total Staff",
-      value: 156,
-      subtitle: "Active employees",
-      icon: Users,
-      trend: { value: 2.1, isPositive: true },
-      variant: "success",
-    },
-    {
-      title: "Care Homes",
-      value: 3,
-      subtitle: "Under management",
-      icon: Building2,
-      variant: "default",
-    },
-  ]
+export interface KPICardsData {
+  total_staff?: number
+  clocked_in_now?: number
+  late_today?: number
+  hours_today?: number
+  total_care_homes?: number
+  expected_not_in?: number
+  isSuperAdmin?: boolean
+}
+
+export function KPICards({ data }: { data?: KPICardsData }) {
+  const kpiData: KPICardProps[] = data
+    ? data.isSuperAdmin
+      ? [
+          {
+            title: "Total Staff",
+            value: data.total_staff ?? 0,
+            subtitle: "Active employees",
+            icon: Users,
+            variant: "success",
+          },
+          {
+            title: "Care Homes",
+            value: data.total_care_homes ?? 0,
+            subtitle: "Under management",
+            icon: Building2,
+            variant: "default",
+          },
+          {
+            title: "Clocked In Now",
+            value: data.clocked_in_now ?? 0,
+            subtitle: "Across all homes",
+            icon: Clock,
+            variant: "default",
+          },
+          {
+            title: "Hours Today",
+            value: (data.hours_today ?? 0).toFixed(1),
+            subtitle: "Platform-wide",
+            icon: TrendingUp,
+            variant: "default",
+          },
+        ]
+      : [
+          {
+            title: "Total Staff",
+            value: data.total_staff ?? 0,
+            subtitle: "Active employees",
+            icon: Users,
+            variant: "success",
+          },
+          {
+            title: "Clocked In Now",
+            value: data.clocked_in_now ?? 0,
+            subtitle: "Currently on site",
+            icon: Clock,
+            variant: "default",
+          },
+          {
+            title: "Late Today",
+            value: data.late_today ?? 0,
+            subtitle: "Late arrivals",
+            icon: AlertTriangle,
+            variant: (data.late_today ?? 0) > 0 ? "danger" : "default",
+          },
+          {
+            title: "Hours Today",
+            value: (data.hours_today ?? 0).toFixed(1),
+            subtitle: "Total hours worked",
+            icon: TrendingUp,
+            variant: "default",
+          },
+        ]
+    : [
+        {
+          title: "Total Staff",
+          value: "—",
+          subtitle: "Loading…",
+          icon: Users,
+          variant: "default",
+        },
+        {
+          title: "Clocked In Now",
+          value: "—",
+          subtitle: "Loading…",
+          icon: Clock,
+          variant: "default",
+        },
+        {
+          title: "Late Today",
+          value: "—",
+          subtitle: "Loading…",
+          icon: AlertTriangle,
+          variant: "default",
+        },
+        {
+          title: "Hours Today",
+          value: "—",
+          subtitle: "Loading…",
+          icon: TrendingUp,
+          variant: "default",
+        },
+      ]
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Bell, Search, Moon, Sun, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,19 +16,55 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { useTheme } from "next-themes"
+import type { UserRole } from "@/lib/types"
+
+function getRoleLabel(role: UserRole): string {
+  const labels: Record<string, string> = {
+    super_admin: "Platform Admin",
+    care_home_admin: "Care Home Admin",
+    manager: "Manager",
+    senior_carer: "Senior Carer",
+    carer: "Carer",
+    nurse: "Nurse",
+    domestic: "Domestic",
+    kitchen: "Kitchen",
+    maintenance: "Maintenance",
+    admin_staff: "Admin Staff",
+  }
+  return labels[role] ?? role
+}
+
+export interface HeaderUserProps {
+  firstName: string
+  lastName: string
+  role: UserRole
+}
 
 interface HeaderProps {
   title: string
   subtitle?: string
+  user?: HeaderUserProps
 }
 
-export function Header({ title, subtitle }: HeaderProps) {
-  const { theme, setTheme, resolvedTheme } = useTheme()
+export function Header({ title, subtitle, user }: HeaderProps) {
+  const { setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  const fullName = user ? `${user.firstName} ${user.lastName}` : ""
+  const roleLabel = user ? getRoleLabel(user.role) : ""
+  const initials = user
+    ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+    : "?"
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" })
+    router.push("/login")
+  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -37,17 +74,11 @@ export function Header({ title, subtitle }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Search */}
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search..."
-            className="w-64 bg-secondary pl-9"
-          />
+          <Input type="search" placeholder="Search..." className="w-64 bg-secondary pl-9" />
         </div>
 
-        {/* Theme Toggle */}
         <Button
           variant="ghost"
           size="icon"
@@ -55,18 +86,13 @@ export function Header({ title, subtitle }: HeaderProps) {
           className="text-muted-foreground hover:text-foreground"
         >
           {mounted ? (
-            resolvedTheme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )
+            resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />
           ) : (
             <div className="h-5 w-5" />
           )}
           <span className="sr-only">Toggle theme</span>
         </Button>
 
-        {/* Chat Support */}
         <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
           <MessageSquare className="h-5 w-5" />
           <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
@@ -74,7 +100,6 @@ export function Header({ title, subtitle }: HeaderProps) {
           </span>
         </Button>
 
-        {/* Notifications */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
@@ -115,30 +140,43 @@ export function Header({ title, subtitle }: HeaderProps) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* User Menu */}
+        {/* User Menu — Requirements 8.4, 8.5 */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2 pl-2 pr-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-                <AvatarFallback className="bg-primary text-primary-foreground">JD</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
-              <span className="hidden text-sm font-medium md:inline">John Doe</span>
+              {fullName && (
+                <span className="hidden text-sm font-medium md:inline">{fullName}</span>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>
-              <div className="flex flex-col">
-                <span>John Doe</span>
-                <span className="text-xs font-normal text-muted-foreground">Care Home Admin</span>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            {user && (
+              <>
+                <DropdownMenuLabel>
+                  <div className="flex flex-col">
+                    <span>{fullName}</span>
+                    <span className="text-xs font-normal text-muted-foreground">{roleLabel}</span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem>My Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>Help & Support</DropdownMenuItem>
+            <DropdownMenuItem>Help &amp; Support</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Log out</DropdownMenuItem>
+            {/* Requirement 8.5 — logout wired to API */}
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={handleLogout}
+            >
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
