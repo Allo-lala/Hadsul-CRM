@@ -4,7 +4,8 @@ import { KPICards } from "@/components/dashboard/kpi-cards"
 import { ActivityFeed } from "@/components/dashboard/activity-feed"
 import { LiveAttendance } from "@/components/dashboard/live-attendance"
 import { QuickActions } from "@/components/dashboard/quick-actions"
-import { getCurrentUser, isSuperAdmin } from '@/lib/auth'
+import { StaffDashboard } from "@/components/dashboard/staff-dashboard"
+import { getCurrentUser, isSuperAdmin, isStaff } from '@/lib/auth'
 import type { DashboardStats } from '@/lib/types'
 import type { ActivityEvent } from '@/components/dashboard/activity-feed'
 import type { CareHome } from '@/lib/types'
@@ -56,6 +57,20 @@ export default async function DashboardPage() {
 
   const user = await getCurrentUser()
   const superAdmin = isSuperAdmin(user)
+  const staffOnly = isStaff(user)
+
+  // Staff get their own personal dashboard
+  if (staffOnly) {
+    return (
+      <div className="min-h-screen">
+        <Header
+          title="My Dashboard"
+          subtitle={`Welcome back, ${user?.first_name ?? "there"}. Here's your activity overview.`}
+        />
+        <StaffDashboard firstName={user?.first_name ?? ""} />
+      </div>
+    )
+  }
 
   const [stats, activity, careHomes] = await Promise.all([
     fetchStats(cookieHeader),

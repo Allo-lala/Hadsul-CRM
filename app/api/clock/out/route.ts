@@ -43,7 +43,24 @@ export async function POST(request: NextRequest) {
         total_hours_worked, status, is_late
     `
 
-    return NextResponse.json(rows[0] as ClockRecord)
+    const record = rows[0] as ClockRecord & { total_hours_worked: number | null; care_home_id: string }
+
+    // Notify the staff member
+    if (user.care_home_id) {
+      const hours = record.total_hours_worked != null ? Number(record.total_hours_worked).toFixed(1) : "0"
+      await sql`
+        INSERT INTO notifications (user_id, care_home_id, title, message, type)
+        VALUES (
+          ${user.id},
+          ${user.care_home_id},
+          'Clocked Out',
+          ${`You clocked out. Total hours worked: ${hours}h`},
+          'info'
+        )
+      `
+    }
+
+    return NextResponse.json(record)
   } catch (err) {
     console.error('[POST /api/clock/out]', err)
     return serverError()

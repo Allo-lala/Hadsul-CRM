@@ -9,9 +9,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Hadsul CRM - Care Home Management',
-  description: 'A comprehensive care home management system for staff scheduling, clock-in/out, care plans, and reporting.',
-  generator: 'v0.app',
+  title: 'Hadsul CRM',
+  description: 'A comprehensive care home management system for modern care homes',
   icons: {
     icon: [
       {
@@ -23,11 +22,11 @@ export const metadata: Metadata = {
         media: '(prefers-color-scheme: dark)',
       },
       {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: '/favicon.ico',
+        type: 'image/ico+xml',
       },
     ],
-    apple: '/apple-icon.png',
+    apple: '/favicon.ico',
   },
 }
 

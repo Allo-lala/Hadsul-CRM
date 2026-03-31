@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import { getCurrentUser } from "@/lib/auth"
-import { sql } from "@/lib/db"
+import { getDb } from "@/lib/db"
 import { Sidebar } from "@/components/dashboard/sidebar"
 
 export default async function DashboardLayout({
@@ -11,17 +11,22 @@ export default async function DashboardLayout({
   const user = await getCurrentUser()
   if (!user) redirect("/login")
 
-  // Fetch care home name if the user belongs to one
+  const db = getDb()
+
+  // Fetch care home name and profile image
   let careHomeName: string | null = null
+  let profileImageUrl: string | null = null
+
+  try {
+    const userRow = await db`SELECT profile_image_url FROM users WHERE id = ${user.id} LIMIT 1`
+    profileImageUrl = (userRow[0] as { profile_image_url: string | null } | undefined)?.profile_image_url ?? null
+  } catch { /* non-fatal */ }
+
   if (user.care_home_id) {
     try {
-      const rows = await sql`
-        SELECT name FROM care_homes WHERE id = ${user.care_home_id} LIMIT 1
-      `
+      const rows = await db`SELECT name FROM care_homes WHERE id = ${user.care_home_id} LIMIT 1`
       careHomeName = (rows[0] as { name: string } | undefined)?.name ?? null
-    } catch {
-      // non-fatal — sidebar will fall back gracefully
-    }
+    } catch { /* non-fatal */ }
   }
 
   const userProps = {
@@ -29,6 +34,7 @@ export default async function DashboardLayout({
     lastName: user.last_name,
     role: user.role,
     careHomeName,
+    profileImageUrl,
   }
 
   return (

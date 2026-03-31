@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Building2, Eye, EyeOff, Loader2, Shield, Users, Heart } from "lucide-react"
+import { Eye, EyeOff, Loader2, Shield, Users, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -59,10 +59,8 @@ export default function LoginPage() {
       {/* Left panel — brand / illustration */}
       <div className="hidden lg:flex lg:w-1/2 bg-sidebar flex-col justify-between p-12">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-            <Building2 className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold text-sidebar-foreground">Hadsul CRM</span>
+          <img src="/logo.png" alt="Hadsul" className="h-42 w-42 rounded-xl object-contain" />
+          <span className="text-xl font-bold text-sidebar-foreground">CRM</span>
         </div>
 
         <div className="space-y-8">
@@ -104,10 +102,8 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center justify-center gap-3 mb-8 lg:hidden">
-            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center">
-              <Building2 className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-foreground">Hadsul CRM</span>
+            <img src="/logo.png" alt="Hadsul" className="h-32 w-32 rounded-xl object-contain" />
+            <span className="text-xl font-bold text-foreground">CRM</span>
           </div>
 
           <Card className="border-border shadow-sm">

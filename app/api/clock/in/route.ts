@@ -69,6 +69,18 @@ export async function POST(request: NextRequest) {
 
     const record = rows[0] as ClockRecord
 
+    // Notify the staff member themselves
+    await sql`
+      INSERT INTO notifications (user_id, care_home_id, title, message, type)
+      VALUES (
+        ${user.id},
+        ${user.care_home_id},
+        'Clocked In',
+        ${`You clocked in at ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`},
+        'success'
+      )
+    `
+
     // If late, notify the care home admin (Requirement 5.4)
     if (isLate && user.care_home_id) {
       const adminRows = await sql`

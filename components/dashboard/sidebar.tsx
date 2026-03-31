@@ -9,13 +9,12 @@ import {
   Users,
   Calendar,
   Clock,
-  FileText,
   Building2,
   ChevronDown,
   ChevronRight,
   BarChart3,
   Bell,
-  HelpCircle,
+  MessageSquare,
   LogOut,
   Menu,
   X,
@@ -26,6 +25,8 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import type { UserRole } from "@/lib/types"
+import { NotificationsPanel } from "@/components/dashboard/notifications-panel"
+import { SupportChat } from "@/components/dashboard/support-chat"
 
 interface NavItem {
   title: string
@@ -78,6 +79,7 @@ function getNavItems(role: UserRole): NavItem[] {
 
   // Staff / all other roles (Requirements 8.3)
   return [
+    { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { title: "Clock In/Out", href: "/dashboard/clock", icon: Clock },
     { title: "My Schedule", href: "/dashboard/calendar", icon: Calendar },
     { title: "My Profile", href: "/dashboard/profile", icon: User },
@@ -177,6 +179,7 @@ export interface SidebarUserProps {
   lastName: string
   role: UserRole
   careHomeName: string | null
+  profileImageUrl?: string | null
 }
 
 interface SidebarProps {
@@ -186,11 +189,13 @@ interface SidebarProps {
 export function Sidebar({ user }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
   const router = useRouter()
 
+  const isStaffRole = !["super_admin", "care_home_admin", "manager"].includes(user.role)
   const navItems = getNavItems(user.role)
   const roleLabel = getRoleLabel(user.role)
-  // Requirement 8.4: show care home name or "Platform Admin" for super_admin
   const contextLabel = user.role === "super_admin" ? "Platform Admin" : (user.careHomeName ?? roleLabel)
   const initials = getInitials(user.firstName, user.lastName)
   const fullName = `${user.firstName} ${user.lastName}`
@@ -202,7 +207,7 @@ export function Sidebar({ user }: SidebarProps) {
 
   const bottomNavItems: NavItem[] = [
     { title: "Updates & News", href: "/dashboard/updates", icon: Bell },
-    { title: "Help & Support", href: "/dashboard/support", icon: HelpCircle },
+    { title: "Help & Support", href: "/dashboard/support", icon: MessageSquare },
   ]
 
   return (
@@ -265,22 +270,56 @@ export function Sidebar({ user }: SidebarProps) {
         {/* Bottom Section */}
         <div className="border-t border-sidebar-border p-3">
           <nav className="mb-3 space-y-1">
-            {bottomNavItems.map((item) => (
-              <NavItemComponent key={item.title} item={item} isCollapsed={isCollapsed} />
-            ))}
+            {isStaffRole ? (
+              <>
+                <button
+                  onClick={() => setNotifOpen(true)}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all"
+                >
+                  <Bell className="h-5 w-5 shrink-0" />
+                  {!isCollapsed && <span>Updates & News</span>}
+                </button>
+                <button
+                  onClick={() => setChatOpen(true)}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all"
+                >
+                  <MessageSquare className="h-5 w-5 shrink-0" />
+                  {!isCollapsed && <span>Help & Support</span>}
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-all"
+                >
+                  <LogOut className="h-5 w-5 shrink-0 text-destructive" />
+                  {!isCollapsed && <span>Log out</span>}
+                </button>
+              </>
+            ) : (
+              <>
+                {bottomNavItems.map((item) => (
+                  <NavItemComponent key={item.title} item={item} isCollapsed={isCollapsed} />
+                ))}
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 transition-all"
+                >
+                  <LogOut className="h-5 w-5 shrink-0 text-destructive" />
+                  {!isCollapsed && <span>Log out</span>}
+                </button>
+              </>
+            )}
           </nav>
 
-          {/* User Profile (Requirement 8.4) */}
-          <div
-            className={cn(
-              "flex items-center gap-3 rounded-lg p-2",
-              isCollapsed && "justify-center"
-            )}
-          >
+          {/* User name / context — no logout button here anymore */}
+          <div className={cn("flex items-center gap-3 rounded-lg p-2", isCollapsed && "justify-center")}>
             <Avatar className="h-9 w-9 shrink-0">
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                {initials}
-              </AvatarFallback>
+              {user.profileImageUrl ? (
+                <img src={user.profileImageUrl} alt={fullName} className="h-9 w-9 rounded-full object-cover" />
+              ) : (
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                  {initials}
+                </AvatarFallback>
+              )}
             </Avatar>
             {!isCollapsed && (
               <div className="flex-1 overflow-hidden">
@@ -288,20 +327,17 @@ export function Sidebar({ user }: SidebarProps) {
                 <p className="truncate text-xs text-sidebar-foreground/60">{contextLabel}</p>
               </div>
             )}
-            {!isCollapsed && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 shrink-0 text-sidebar-foreground/70 hover:text-destructive"
-                onClick={handleLogout}
-                title="Log out"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            )}
           </div>
         </div>
       </aside>
+
+      {/* Staff panels rendered from sidebar */}
+      {isStaffRole && (
+        <>
+          <NotificationsPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
+          <SupportChat open={chatOpen} onClose={() => setChatOpen(false)} staffName={fullName} />
+        </>
+      )}
     </>
   )
 }

@@ -101,8 +101,21 @@ export async function getCurrentUser(request?: Request): Promise<DbUser | null> 
       SELECT * FROM users WHERE id = ${payload.userId} AND is_active = true LIMIT 1
     `
     return (rows[0] as DbUser) ?? null
-  } catch {
-    return null
+  } catch (err: unknown) {
+    // Retry once on Neon cold-start timeout
+    const msg = err instanceof Error ? err.message : String(err)
+    const isTimeout = msg.includes('ETIMEDOUT') || msg.includes('ConnectTimeoutError') || msg.includes('fetch failed')
+    if (!isTimeout) return null
+    try {
+      await new Promise(r => setTimeout(r, 600))
+      const sql2 = getDb()
+      const rows = await sql2`
+        SELECT * FROM users WHERE id = ${payload.userId} AND is_active = true LIMIT 1
+      `
+      return (rows[0] as DbUser) ?? null
+    } catch {
+      return null
+    }
   }
 }
 
