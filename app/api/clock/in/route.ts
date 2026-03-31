@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
 import { unauthorized, conflict, serverError } from '@/lib/api'
 import type { ClockRecord } from '@/lib/types'
 
 // POST /api/clock/in
-// Creates a new clock record for the authenticated user.
-// Rejects with 409 if an open record already exists (Requirement 4.4).
-// Detects late arrival vs scheduled shift (Requirement 4.5).
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser(request)
   if (!user) return unauthorized()
 
-  // User must belong to a care home to clock in
   if (!user.care_home_id) {
     return conflict('You are not assigned to a care home')
   }
+
+  const sql = getDb()
 
   try {
     // Check for existing open clock record (Requirement 4.4)

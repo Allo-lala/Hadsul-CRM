@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
 import { unauthorized, serverError } from '@/lib/api'
 import type { ClockRecord } from '@/lib/types'
@@ -7,13 +7,14 @@ import type { ClockRecord } from '@/lib/types'
 // POST /api/clock/out
 // Closes the open clock record for the authenticated user.
 // Calculates total_hours_worked = EXTRACT(EPOCH FROM (clock_out - clock_in)) / 3600
-// Returns 400 if no open record exists.
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser(request)
   if (!user) return unauthorized()
 
+  // Fresh DB client per request — avoids Neon ETIMEDOUT on idle connections
+  const sql = getDb()
+
   try {
-    // Find the open clock record
     const openRows = await sql`
       SELECT id, clock_in_time
       FROM clock_records
@@ -29,7 +30,6 @@ export async function POST(request: NextRequest) {
 
     const recordId = openRows[0].id as string
 
-    // Set clock_out_time and calculate total_hours_worked (Requirement 4.2)
     const rows = await sql`
       UPDATE clock_records
       SET

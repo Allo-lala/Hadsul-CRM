@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
-import { sql } from './db'
+import { getDb } from './db'
 
 export type UserRole =
   | 'super_admin'
@@ -96,6 +96,7 @@ export async function getCurrentUser(request?: Request): Promise<DbUser | null> 
   if (!payload?.userId) return null
 
   try {
+    const sql = getDb()
     const rows = await sql`
       SELECT * FROM users WHERE id = ${payload.userId} AND is_active = true LIMIT 1
     `

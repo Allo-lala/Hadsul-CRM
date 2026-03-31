@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { getCurrentUser } from '@/lib/auth'
 import { unauthorized, serverError } from '@/lib/api'
 import type { ClockRecord } from '@/lib/types'
 
 // GET /api/clock/status
-// Returns the current open clock record for the authenticated user, or null
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser(request)
   if (!user) return unauthorized()
+
+  const sql = getDb()
 
   try {
     const rows = await sql`

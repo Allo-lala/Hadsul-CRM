@@ -1,290 +1,352 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Header } from "@/components/dashboard/header"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import {
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Calendar as CalendarIcon,
-  Clock,
-  MapPin,
-  Users,
-} from "lucide-react"
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
+import { ChevronLeft, ChevronRight, Plus, Bell, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { apiRequest } from "@/lib/api"
+import type { CalendarEvent } from "@/app/api/calendar/route"
+import {
+  MONTHS, toDateKey, sameDay, getWeekDates,
+  YearView, MonthView, WeekView, DayView, ScheduleView,
+} from "@/components/dashboard/calendar-views"
 
-interface Event {
-  id: string
-  title: string
-  type: "shift" | "meeting" | "review" | "training" | "inspection"
-  time: string
-  location?: string
-  attendees?: number
-}
+type ViewMode = "year" | "month" | "week" | "day" | "schedule"
 
-interface DayEvents {
-  [key: number]: Event[]
-}
-
-const events: DayEvents = {
-  24: [
-    { id: "1", title: "Morning Shift Handover", type: "shift", time: "07:00", location: "Wing A" },
-    { id: "2", title: "Care Plan Review - Mrs. Thompson", type: "review", time: "10:00", location: "Office" },
-  ],
-  25: [
-    { id: "3", title: "Staff Training Session", type: "training", time: "14:00", location: "Training Room", attendees: 12 },
-  ],
-  26: [
-    { id: "4", title: "Team Meeting", type: "meeting", time: "09:00", location: "Conference Room", attendees: 8 },
-    { id: "5", title: "Evening Shift Handover", type: "shift", time: "15:00", location: "Wing B" },
-  ],
-  27: [
-    { id: "6", title: "CQC Inspection", type: "inspection", time: "10:00", location: "All Areas" },
-  ],
-  28: [
-    { id: "7", title: "Fire Safety Training", type: "training", time: "11:00", location: "Training Room", attendees: 20 },
-    { id: "8", title: "Care Plan Review - Mr. Davis", type: "review", time: "14:00", location: "Office" },
-  ],
-  30: [
-    { id: "9", title: "Monthly Staff Meeting", type: "meeting", time: "10:00", location: "Main Hall", attendees: 45 },
-  ],
-}
-
-const eventStyles = {
-  shift: "bg-chart-1/20 border-chart-1/40 text-chart-1",
-  meeting: "bg-chart-2/20 border-chart-2/40 text-chart-2",
-  review: "bg-warning/20 border-warning/40 text-warning",
-  training: "bg-chart-4/20 border-chart-4/40 text-chart-4",
-  inspection: "bg-destructive/20 border-destructive/40 text-destructive",
-}
-
-const eventLabels = {
-  shift: "Shift",
-  meeting: "Meeting",
-  review: "Review",
-  training: "Training",
-  inspection: "Inspection",
-}
-
-const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-
-// Generate calendar days for March 2025
-const generateCalendarDays = () => {
-  const days = []
-  // Previous month days (Feb ends on 28, March starts on Saturday)
-  for (let i = 0; i < 6; i++) {
-    days.push({ day: 23 + i, currentMonth: false })
-  }
-  // Current month days
-  for (let i = 1; i <= 31; i++) {
-    days.push({ day: i, currentMonth: true })
-  }
-  // Next month days
-  for (let i = 1; i <= 5; i++) {
-    days.push({ day: i, currentMonth: false })
-  }
-  return days
-}
-
-const calendarDays = generateCalendarDays()
+const REMINDER_OPTIONS = [
+  { value: "0",    label: "At time of event" },
+  { value: "5",    label: "5 minutes before" },
+  { value: "10",   label: "10 minutes before" },
+  { value: "15",   label: "15 minutes before" },
+  { value: "30",   label: "30 minutes before" },
+  { value: "60",   label: "1 hour before" },
+  { value: "1440", label: "1 day before" },
+]
 
 export default function CalendarPage() {
-  const [selectedDate, setSelectedDate] = useState(24)
-  const today = 24 // Simulating today as March 24
+  const today = new Date()
+  const [view, setView] = useState<ViewMode>("month")
+  const [anchor, setAnchor] = useState(new Date(today.getFullYear(), today.getMonth(), today.getDate()))
+  const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedDate, setSelectedDate] = useState<Date>(today)
 
-  const selectedEvents = events[selectedDate] || []
+  const [addOpen, setAddOpen] = useState(false)
+  const [addForm, setAddForm] = useState({
+    title: "", description: "",
+    event_date: toDateKey(today),
+    start_time: "", end_time: "",
+    type: "personal", reminder_minutes: "", is_all_day: false,
+  })
+  const [addError, setAddError] = useState<string | null>(null)
+  const [addSaving, setAddSaving] = useState(false)
+  const [deleting, setDeleting] = useState<string | null>(null)
+
+  const fetchEvents = useCallback(async (year: number, month: number, wide = false) => {
+    setLoading(true)
+    if (wide) {
+      // Schedule view: fetch 6 months from today
+      const now = new Date()
+      const results: CalendarEvent[] = []
+      for (let i = 0; i < 6; i++) {
+        const y = now.getFullYear() + Math.floor((now.getMonth() + i) / 12)
+        const m = ((now.getMonth() + i) % 12) + 1
+        const { data } = await apiRequest<CalendarEvent[]>(`/api/calendar?year=${y}&month=${m}`)
+        if (data) results.push(...data)
+      }
+      // Deduplicate by id
+      const seen = new Set<string>()
+      setEvents(results.filter(e => { if (seen.has(e.id)) return false; seen.add(e.id); return true }))
+    } else {
+      const { data, status } = await apiRequest<CalendarEvent[]>(`/api/calendar?year=${year}&month=${month + 1}`)
+      if (data !== null) setEvents(data)
+      else if (status === 401 || status === 500) {
+        await new Promise(r => setTimeout(r, 800))
+        const retry = await apiRequest<CalendarEvent[]>(`/api/calendar?year=${year}&month=${month + 1}`)
+        if (retry.data !== null) setEvents(retry.data)
+      }
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    fetchEvents(anchor.getFullYear(), anchor.getMonth(), view === "schedule")
+  }, [anchor, view, fetchEvents])
+
+  const eventsByDate = events.reduce<Record<string, CalendarEvent[]>>((acc, ev) => {
+    const key = ev.event_date.slice(0, 10)
+    if (!acc[key]) acc[key] = []
+    acc[key].push(ev)
+    return acc
+  }, {})
+
+  function navigate(dir: 1 | -1) {
+    const d = new Date(anchor)
+    if (view === "month" || view === "year") d.setMonth(d.getMonth() + dir)
+    else if (view === "week" || view === "schedule") d.setDate(d.getDate() + dir * 7)
+    else d.setDate(d.getDate() + dir)
+    setAnchor(d)
+  }
+
+  function goToday() {
+    const t = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    setAnchor(t)
+    setSelectedDate(today)
+  }
+
+  function openAdd(date?: Date | string) {
+    const d = date instanceof Date ? date : (date ? new Date(date + 'T00:00:00') : selectedDate)
+    setAddForm({
+      title: "", description: "",
+      event_date: toDateKey(d),
+      start_time: "", end_time: "",
+      type: "personal", reminder_minutes: "", is_all_day: false,
+    })
+    setAddError(null)
+    setAddOpen(true)
+  }
+
+  async function handleAddEvent() {
+    if (!addForm.title.trim()) { setAddError("Title is required"); return }
+    setAddSaving(true)
+    setAddError(null)
+    const payload: Record<string, unknown> = {
+      title: addForm.title.trim(),
+      event_date: addForm.event_date,
+      type: addForm.type,
+      is_all_day: addForm.is_all_day,
+    }
+    if (addForm.description.trim()) payload.description = addForm.description.trim()
+    if (!addForm.is_all_day && addForm.start_time) payload.start_time = addForm.start_time
+    if (!addForm.is_all_day && addForm.end_time) payload.end_time = addForm.end_time
+    if (addForm.reminder_minutes !== "" && addForm.reminder_minutes !== "none") payload.reminder_minutes = Number(addForm.reminder_minutes)
+
+    const { data, error } = await apiRequest<CalendarEvent>("/api/calendar", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    })
+    setAddSaving(false)
+    if (error) { setAddError(error); return }
+    if (data) { setEvents(prev => [...prev, data]); setAddOpen(false) }
+  }
+
+  async function handleDelete(id: string) {
+    setDeleting(id)
+    await apiRequest(`/api/calendar?id=${id}`, { method: "DELETE" })
+    setEvents(prev => prev.filter(e => e.id !== id))
+    setDeleting(null)
+  }
+
+  function getTitle(): string {
+    if (view === "month" || view === "year") return `${MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`
+    if (view === "week") {
+      const days = getWeekDates(anchor)
+      return `${MONTHS[days[0].getMonth()]} ${days[0].getDate()} – ${days[6].getDate()}, ${days[6].getFullYear()}`
+    }
+    if (view === "day") return anchor.toLocaleDateString("en-GB", { weekday:"long", day:"numeric", month:"long", year:"numeric" })
+    return `${MONTHS[anchor.getMonth()]} ${anchor.getFullYear()}`
+  }
 
   return (
     <div className="min-h-screen">
-      <Header title="Calendar" subtitle="View shifts, meetings, and events" />
+      <Header title="My Schedule" subtitle="Your shifts, events, and reminders" />
 
-      <div className="p-6">
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Calendar */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Button variant="outline" size="icon">
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <div>
-                    <h2 className="text-xl font-semibold">March 2025</h2>
-                  </div>
-                  <Button variant="outline" size="icon">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
-                    Today
-                  </Button>
-                  <Button size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Event
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {/* Week days header */}
-              <div className="grid grid-cols-7 mb-2">
-                {weekDays.map((day) => (
-                  <div
-                    key={day}
-                    className="p-2 text-center text-sm font-medium text-muted-foreground"
-                  >
-                    {day}
-                  </div>
-                ))}
-              </div>
+      <div className="p-6 space-y-4">
+        {/* toolbar */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={goToday}>Today</Button>
+            <Button variant="outline" size="icon" onClick={() => navigate(1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            <span className="ml-2 text-base font-semibold">{getTitle()}</span>
+          </div>
 
-              {/* Calendar grid */}
-              <div className="grid grid-cols-7 gap-1">
-                {calendarDays.slice(0, 42).map((dateObj, index) => {
-                  const dayEvents = dateObj.currentMonth ? events[dateObj.day] : undefined
-                  const isToday = dateObj.currentMonth && dateObj.day === today
-                  const isSelected = dateObj.currentMonth && dateObj.day === selectedDate
-
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => dateObj.currentMonth && setSelectedDate(dateObj.day)}
-                      className={cn(
-                        "relative min-h-[100px] rounded-lg border p-2 text-left transition-all hover:bg-muted/50",
-                        !dateObj.currentMonth && "bg-muted/20 text-muted-foreground",
-                        isToday && "border-primary bg-primary/5",
-                        isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background"
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "inline-flex h-7 w-7 items-center justify-center rounded-full text-sm",
-                          isToday && "bg-primary text-primary-foreground font-medium"
-                        )}
-                      >
-                        {dateObj.day}
-                      </span>
-                      {dayEvents && dayEvents.length > 0 && (
-                        <div className="mt-1 space-y-1">
-                          {dayEvents.slice(0, 2).map((event) => (
-                            <div
-                              key={event.id}
-                              className={cn(
-                                "truncate rounded px-1.5 py-0.5 text-[10px] font-medium",
-                                eventStyles[event.type]
-                              )}
-                            >
-                              {event.title}
-                            </div>
-                          ))}
-                          {dayEvents.length > 2 && (
-                            <p className="text-[10px] text-muted-foreground pl-1">
-                              +{dayEvents.length - 2} more
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </button>
-                  )
-                })}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Selected Day Events */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5 text-primary" />
-                March {selectedDate}, 2025
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {selectedEvents.length > 0 ? (
-                <ScrollArea className="h-[500px]">
-                  <div className="space-y-4 pr-4">
-                    {selectedEvents.map((event) => (
-                      <div
-                        key={event.id}
-                        className={cn(
-                          "rounded-lg border p-4 transition-all hover:shadow-md",
-                          eventStyles[event.type]
-                        )}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-2">
-                            <Badge variant="outline" className={eventStyles[event.type]}>
-                              {eventLabels[event.type]}
-                            </Badge>
-                            <h3 className="font-semibold">{event.title}</h3>
-                            <div className="flex flex-col gap-1.5 text-sm opacity-80">
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-3.5 w-3.5" />
-                                {event.time}
-                              </div>
-                              {event.location && (
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="h-3.5 w-3.5" />
-                                  {event.location}
-                                </div>
-                              )}
-                              {event.attendees && (
-                                <div className="flex items-center gap-2">
-                                  <Users className="h-3.5 w-3.5" />
-                                  {event.attendees} attendees
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                    <CalendarIcon className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <p className="mt-4 font-medium">No events scheduled</p>
-                  <p className="text-sm text-muted-foreground">
-                    Add an event for this day
-                  </p>
-                  <Button className="mt-4" size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Event
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Event Type Legend */}
-        <Card className="mt-6">
-          <CardContent className="p-4">
-            <div className="flex flex-wrap items-center gap-6">
-              <span className="text-sm font-medium text-muted-foreground">Event Types:</span>
-              {Object.entries(eventLabels).map(([key, label]) => (
-                <div key={key} className="flex items-center gap-2">
-                  <div
-                    className={cn(
-                      "h-4 w-4 rounded border",
-                      eventStyles[key as keyof typeof eventStyles]
-                    )}
-                  />
-                  <span className="text-sm text-muted-foreground">{label}</span>
-                </div>
+          <div className="flex items-center gap-2">
+            <div className="flex rounded-md border border-border overflow-hidden">
+              {(["year","month","week","day","schedule"] as ViewMode[]).map(v => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  className={cn(
+                    "px-3 py-1.5 text-xs font-medium capitalize transition-colors",
+                    view === v ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  {v}
+                </button>
               ))}
             </div>
-          </CardContent>
-        </Card>
+            <Button size="sm" onClick={() => openAdd()}>
+              <Plus className="mr-1.5 h-4 w-4" /> Add Event
+            </Button>
+          </div>
+        </div>
+
+        {/* views */}
+        {view === "year" && (
+          <YearView
+            year={anchor.getFullYear()}
+            today={today}
+            eventsByDate={eventsByDate}
+            onSelectMonth={(m) => { setAnchor(new Date(anchor.getFullYear(), m, 1)); setView("month") }}
+          />
+        )}
+        {view === "month" && (
+          <MonthView
+            year={anchor.getFullYear()}
+            month={anchor.getMonth()}
+            today={today}
+            selectedDate={selectedDate}
+            eventsByDate={eventsByDate}
+            loading={loading}
+            onSelectDate={(d) => { setSelectedDate(d); setView("day"); setAnchor(d) }}
+            onAddEvent={openAdd}
+          />
+        )}
+        {view === "week" && (
+          <WeekView
+            anchor={anchor}
+            today={today}
+            eventsByDate={eventsByDate}
+            loading={loading}
+            onSelectDate={(d) => { setSelectedDate(d); setView("day"); setAnchor(d) }}
+            onAddEvent={openAdd}
+          />
+        )}
+        {view === "day" && (
+          <DayView
+            date={anchor}
+            today={today}
+            events={eventsByDate[toDateKey(anchor)] ?? []}
+            loading={loading}
+            onAddEvent={() => openAdd(anchor)}
+            onDelete={handleDelete}
+            deleting={deleting}
+          />
+        )}
+        {view === "schedule" && (
+          <ScheduleView
+            events={events}
+            loading={loading}
+            onDelete={handleDelete}
+            deleting={deleting}
+            onAddEvent={openAdd}
+          />
+        )}
       </div>
+
+      {/* Add Event Dialog */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Event</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {addError && <p className="text-sm text-destructive">{addError}</p>}
+
+            <div className="space-y-1">
+              <Label>Title *</Label>
+              <Input
+                value={addForm.title}
+                onChange={e => setAddForm({...addForm, title: e.target.value})}
+                placeholder="Event title"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Date *</Label>
+                <Input
+                  type="date"
+                  value={addForm.event_date}
+                  onChange={e => setAddForm({...addForm, event_date: e.target.value})}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Type</Label>
+                <Select value={addForm.type} onValueChange={v => setAddForm({...addForm, type: v})}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["personal","reminder","shift","meeting","review","training","inspection"].map(t => (
+                      <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="all_day"
+                checked={addForm.is_all_day}
+                onChange={e => setAddForm({...addForm, is_all_day: e.target.checked})}
+                className="h-4 w-4 rounded border-border"
+              />
+              <Label htmlFor="all_day" className="cursor-pointer">All day</Label>
+            </div>
+
+            {!addForm.is_all_day && (
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label>Start Time</Label>
+                  <Input type="time" value={addForm.start_time} onChange={e => setAddForm({...addForm, start_time: e.target.value})} />
+                </div>
+                <div className="space-y-1">
+                  <Label>End Time</Label>
+                  <Input type="time" value={addForm.end_time} onChange={e => setAddForm({...addForm, end_time: e.target.value})} />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <Label className="flex items-center gap-1.5">
+                <Bell className="h-3.5 w-3.5" /> Reminder
+              </Label>
+              <Select value={addForm.reminder_minutes} onValueChange={v => setAddForm({...addForm, reminder_minutes: v})}>
+                <SelectTrigger><SelectValue placeholder="No reminder" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No reminder</SelectItem>
+                  {REMINDER_OPTIONS.map(o => (
+                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <Label>Notes</Label>
+              <Textarea
+                value={addForm.description}
+                onChange={e => setAddForm({...addForm, description: e.target.value})}
+                placeholder="Optional notes…"
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddOpen(false)} disabled={addSaving}>Cancel</Button>
+            <Button onClick={handleAddEvent} disabled={addSaving}>
+              {addSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Event
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

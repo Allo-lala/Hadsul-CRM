@@ -242,6 +242,7 @@ async function main() {
   await runFile('003 — Custom auth',     join(__dirname, '003-custom-auth.sql'))
   await runFile('004 — Clock late flag', join(__dirname, '004-clock-late-flag.sql'))
   await runFile('005 — Care home logo',  join(__dirname, '005-care-home-logo.sql'))
+  await runFile('006 — Calendar events', join(__dirname, '006-calendar-events.sql'))
   await seedSuperAdmin()
   await seedHavonCareHome()
 
