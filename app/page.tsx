@@ -154,7 +154,7 @@ export default function LandingPage() {
                 Sign in free
               </Button>
               <Button size="lg" className="rounded-full px-8 h-12 text-base font-semibold border-2 border-white text-black bg-white hover:bg-gray-50 hover:text-black transition-colors"
-                onClick={() => window.open('https://forms.gle/your-google-form-link', '_blank')}>
+                onClick={() => window.open('https://hadsul.vercel.app/what-we-do/client-relationship-manager', '_blank')}>
                 Request CRM
               </Button>
             </div>
