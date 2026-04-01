@@ -63,10 +63,9 @@ function AuthModal({ onClose }: { onClose: () => void }) {
         <button onClick={onClose} className="absolute right-4 top-4 text-zinc-400 hover:text-zinc-600 transition-colors">
           <X className="h-5 w-5" />
         </button>
-
-        <div className="flex items-center gap-3 mb-6">
-          <img src="/logo.png" alt="Hadsul" className="h-9 w-9 object-contain" />
-          <span className="text-lg font-bold text-zinc-900 dark:text-white">Hadsul CRM</span>
+            {/********** Center the logo on the sign in form ************** */}
+        <div className="flex justify-center mb-6">
+          <img src="/logo.png" alt="Hadsul" className="h-16 w-16 object-contain" />
         </div>
 
         <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1">Welcome back</h2>
@@ -122,59 +121,55 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white">
 
-      {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-40" style={{ backgroundColor: "#174731" }}>
-        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center">
-          <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="Hadsul" className="h-9 w-9 object-contain" />
-            <span className="text-lg font-bold text-white">Hadsul CRM</span>
-          </div>
-        </div>
-      </nav>
-
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #f5f0e8 0%, #ffffff 50%, #eef7f2 100%)" }}>
-        <div className="mx-auto max-w-7xl px-6 py-20 lg:py-28 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-7">
+      <section className="relative overflow-hidden" style={{ backgroundColor: "#174731" }}>
+        <div className="mx-auto max-w-7xl px-6 py-8 lg:py-12">
+          {/* Logo at top */}
+          <div className="flex items-center gap-2.5 mb-4">
+            <img src="/logo.png" alt="Hadsul" className="h-32 w-32 object-contain" />
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-7">
             <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium" style={{ backgroundColor: "#e2d2b1", color: "#174731" }}>
-              <span className="h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: "#174731" }} />
+              <span className="h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: "#e2d2b1" }} />
               AI-powered care home platform
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-tight tracking-tight text-zinc-900">
+            <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-tight tracking-tight text-white">
               Care home management{" "}
-              <span style={{ color: "#174731" }}>has been made easier</span>{" "}
-              with the right tools.
+              <span style={{ color: "#e2d2b1" }}>is easier</span>{" "}
+              with the right tools
             </h1>
 
-            <p className="text-lg text-zinc-600 leading-relaxed max-w-xl">
+            <p className="text-lg leading-relaxed max-w-xl text-white">
               One AI-powered care home platform for all your home and staff needs. From dashboards,
-              clock-ins/outs, Rota, payments, and beyond — drive care giving and lasting loyalty.
+              clock-ins/outs, Rota, payments, and beyond — manage care homes efficiently with ease
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="rounded-full px-8 h-12 text-base font-semibold text-white shadow-lg"
-                style={{ backgroundColor: "#174731" }}
+              <Button size="lg" className="rounded-full px-8 h-12 text-base font-semibold text-white shadow-lg hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: "#2563eb" }}
                 onClick={() => setAuthOpen(true)}>
                 Sign in free
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 h-12 text-base font-semibold border-2"
-                style={{ borderColor: "#174731", color: "#174731" }}
+              <Button size="lg" variant="outline" className="rounded-full px-8 h-12 text-base font-semibold border-2 border-white text-black bg-white hover:bg-gray-50 hover:text-black transition-colors"
                 onClick={() => setAuthOpen(true)}>
-                Request a demo
+                Request CRM
               </Button>
             </div>
 
-            <p className="text-sm text-zinc-400">Trusted by care homes across the UK</p>
+            <p className="text-sm text-white">Trusted by care homes across the UK</p>
           </div>
 
-          <div className="relative hidden lg:block">
-            <div className="absolute inset-0 rounded-3xl blur-3xl opacity-30" style={{ background: "radial-gradient(circle, #174731, #e2d2b1)" }} />
-            <img
-              src="/first_page/login.webp"
-              alt="Hadsul platform preview"
-              className="relative rounded-2xl shadow-2xl w-full object-cover"
-            />
+            <div className="relative hidden lg:block">
+              <div className="absolute inset-0 rounded-3xl blur-3xl opacity-30" style={{ background: "radial-gradient(circle, #174731, #e2d2b1)" }} />
+              <img
+                src="/first_page/login.webp"
+                alt="Hadsul platform preview"
+                className="relative rounded-2xl shadow-2xl w-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -205,34 +200,20 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── CTA banner ── */}
-      <section className="py-16" style={{ backgroundColor: "#174731" }}>
-        <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">Ready to transform your care home?</h2>
-          <p className="text-lg" style={{ color: "#e2d2b1" }}>Sign in today and see the difference in the first week.</p>
-          <Button size="lg" className="rounded-full px-10 h-12 text-base font-semibold"
-            style={{ backgroundColor: "#e2d2b1", color: "#174731" }}
-            onClick={() => setAuthOpen(true)}>
-            Get started now
-          </Button>
-        </div>
-      </section>
-
       {/* ── Footer ── */}
       <footer style={{ backgroundColor: "#174731" }}>
         {/* Main footer content */}
-        <div className="mx-auto max-w-7xl px-6 py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="mx-auto max-w-7xl px-6 py-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 items-start">
           {/* Brand */}
-          <div className="space-y-4 lg:col-span-1">
-            <div className="flex items-center gap-2.5">
-              <img src="/logo.png" alt="Hadsul" className="h-9 w-9 object-contain" />
-              <span className="text-lg font-bold text-white">Hadsul CRM</span>
+          <div className="lg:col-span-1">
+            <div className="flex items-start gap-2.5 mb-1">
+              <img src="/logo.png" alt="Hadsul" className="h-24 w-24 object-contain" />
             </div>
-            <p className="text-sm leading-relaxed" style={{ color: "#e2d2b1" }}>
-              The AI-powered care home management platform built for UK care professionals.
+            <p className="text-sm leading-tight mb-1" style={{ color: "#e2d2b1" }}>
+              The AI-powered care home management platform built for care home professionals.
             </p>
             {/* Social icons */}
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3 mt-0">
               {/* Twitter / X */}
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer"
                 className="h-9 w-9 rounded-full flex items-center justify-center transition-opacity hover:opacity-80"
@@ -310,7 +291,7 @@ export default function LandingPage() {
             © {new Date().getFullYear()} Hadsul. All rights reserved.
           </p>
           <p className="text-xs" style={{ color: "#e2d2b1" }}>
-            Built for UK care home professionals
+            Built for Modern care home professionals
           </p>
         </div>
       </footer>
