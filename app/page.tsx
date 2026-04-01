@@ -57,7 +57,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl p-8"
+        className="relative w-full max-w-md rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl p-8"
         onClick={e => e.stopPropagation()}
       >
         <button onClick={onClose} className="absolute right-4 top-4 text-zinc-400 hover:text-zinc-600 transition-colors">
@@ -68,12 +68,12 @@ function AuthModal({ onClose }: { onClose: () => void }) {
           <img src="/logo.png" alt="Hadsul" className="h-16 w-16 object-contain" />
         </div>
 
-        <h2 className="text-2xl font-bold text-zinc-900 mb-1">Welcome back</h2>
+        <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1">Welcome back</h2>
         <p className="text-sm text-zinc-500 mb-6">Sign in to your account to continue</p>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-zinc-700">Email address</Label>
+            <Label htmlFor="email" className="text-zinc-700 dark:text-zinc-300">Email address</Label>
             <Input id="email" type="email" autoComplete="email" placeholder="you@example.com"
               className="h-11" {...register("email")} />
             {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
@@ -132,8 +132,8 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-7">
             <div className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium" style={{ backgroundColor: "#e2d2b1", color: "#174731" }}>
-              <span className="h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: "#e2d2b1" }} />
-              AI-powered care home platform
+              <span className="h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: "#f10808" }} />
+              Free 100% AI-powered care home CRM
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-tight tracking-tight text-white">
@@ -143,7 +143,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-lg leading-relaxed max-w-xl text-white">
-              One AI-powered care home platform for all your home and staff needs. From dashboards,
+              One AI-powered care home platform for all your care home and staff needs. From dashboards,
               clock-ins/outs, Rota, payments, and beyond — manage care homes efficiently with ease
             </p>
 
@@ -151,7 +151,7 @@ export default function LandingPage() {
               <Button size="lg" className="rounded-full px-8 h-12 text-base font-semibold text-white shadow-lg hover:opacity-90 transition-opacity"
                 style={{ backgroundColor: "#2563eb" }}
                 onClick={() => setAuthOpen(true)}>
-                Sign in free
+                Sign in
               </Button>
               <Button size="lg" className="rounded-full px-8 h-12 text-base font-semibold border-2 border-white text-black bg-white hover:bg-gray-50 hover:text-black transition-colors"
                 onClick={() => window.open('https://hadsul.vercel.app/what-we-do/client-relationship-manager', '_blank')}>
@@ -159,7 +159,7 @@ export default function LandingPage() {
               </Button>
             </div>
 
-            <p className="text-sm text-white">Trusted by care homes across the UK</p>
+            <p className="text-sm text-white">Trusted by care homes across the UK, USA & Europe</p>
           </div>
 
             <div className="relative hidden lg:block">
