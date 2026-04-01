@@ -57,7 +57,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="relative w-full max-w-md rounded-2xl bg-white dark:bg-zinc-900 shadow-2xl p-8"
+        className="relative w-full max-w-md rounded-2xl bg-white shadow-2xl p-8"
         onClick={e => e.stopPropagation()}
       >
         <button onClick={onClose} className="absolute right-4 top-4 text-zinc-400 hover:text-zinc-600 transition-colors">
@@ -68,12 +68,12 @@ function AuthModal({ onClose }: { onClose: () => void }) {
           <img src="/logo.png" alt="Hadsul" className="h-16 w-16 object-contain" />
         </div>
 
-        <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-1">Welcome back</h2>
+        <h2 className="text-2xl font-bold text-zinc-900 mb-1">Welcome back</h2>
         <p className="text-sm text-zinc-500 mb-6">Sign in to your account to continue</p>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-zinc-700 dark:text-zinc-300">Email address</Label>
+            <Label htmlFor="email" className="text-zinc-700">Email address</Label>
             <Input id="email" type="email" autoComplete="email" placeholder="you@example.com"
               className="h-11" {...register("email")} />
             {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
@@ -81,7 +81,7 @@ function AuthModal({ onClose }: { onClose: () => void }) {
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-zinc-700 dark:text-zinc-300">Password</Label>
+              <Label htmlFor="password" className="text-zinc-700">Password</Label>
               <Link href="/forgot-password" className="text-xs text-primary hover:underline">Forgot password?</Link>
             </div>
             <div className="relative">
@@ -153,8 +153,8 @@ export default function LandingPage() {
                 onClick={() => setAuthOpen(true)}>
                 Sign in free
               </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 h-12 text-base font-semibold border-2 border-white text-black bg-white hover:bg-gray-50 hover:text-black transition-colors"
-                onClick={() => setAuthOpen(true)}>
+              <Button size="lg" className="rounded-full px-8 h-12 text-base font-semibold border-2 border-white text-black bg-white hover:bg-gray-50 hover:text-black transition-colors"
+                onClick={() => window.open('https://forms.gle/your-google-form-link', '_blank')}>
                 Request CRM
               </Button>
             </div>
