@@ -80,7 +80,7 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
-                  className="text-gray-900 bg-white"
+                  className="text-gray-900 bg-white border-gray-900 placeholder:text-gray-900"
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
                   {...register("email")}
@@ -110,7 +110,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="••••••••"
-                    className="pr-10 text-gray-900 bg-white"
+                    className="pr-10 text-gray-900 bg-white border-gray-900 placeholder:text-gray-900"
                     aria-invalid={!!errors.password}
                     aria-describedby={errors.password ? "password-error" : undefined}
                     {...register("password")}
