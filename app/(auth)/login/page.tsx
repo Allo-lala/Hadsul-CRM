@@ -74,18 +74,19 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-gray-900">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
+                  className="text-gray-900 bg-white"
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
                   {...register("email")}
                 />
                 {errors.email && (
-                  <p id="email-error" className="text-sm text-destructive">
+                  <p id="email-error" className="text-sm text-red-600">
                     {errors.email.message}
                   </p>
                 )}
@@ -94,7 +95,7 @@ export default function LoginPage() {
               {/* Password */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-gray-900">Password</Label>
                   <Link
                     href="/forgot-password"
                     className="text-sm text-emerald-600 hover:text-emerald-700 transition-colors"
@@ -109,7 +110,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="••••••••"
-                    className="pr-10"
+                    className="pr-10 text-gray-900 bg-white"
                     aria-invalid={!!errors.password}
                     aria-describedby={errors.password ? "password-error" : undefined}
                     {...register("password")}
@@ -128,7 +129,7 @@ export default function LoginPage() {
                   </button>
                 </div>
                 {errors.password && (
-                  <p id="password-error" className="text-sm text-destructive">
+                  <p id="password-error" className="text-sm text-red-600">
                     {errors.password.message}
                   </p>
                 )}
@@ -138,7 +139,7 @@ export default function LoginPage() {
               {serverError && (
                 <div
                   role="alert"
-                  className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive"
+                  className="rounded-md bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600"
                 >
                   {serverError}
                 </div>

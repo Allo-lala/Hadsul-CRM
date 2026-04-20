@@ -106,18 +106,19 @@ export default function ForgotPasswordPage() {
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="email">Email address</Label>
+                  <Label htmlFor="email" className="text-gray-900">Email address</Label>
                   <Input
                     id="email"
                     type="email"
                     autoComplete="email"
                     placeholder="you@example.com"
+                    className="text-gray-900 bg-white"
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? "email-error" : undefined}
                     {...register("email")}
                   />
                   {errors.email && (
-                    <p id="email-error" className="text-sm text-destructive">
+                    <p id="email-error" className="text-sm text-red-600">
                       {errors.email.message}
                     </p>
                   )}
