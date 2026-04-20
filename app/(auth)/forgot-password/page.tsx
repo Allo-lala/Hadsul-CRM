@@ -68,10 +68,10 @@ export default function ForgotPasswordPage() {
             </Card>
 
             <Link href="/login">
-              <Button variant="ghost" className="w-full text-white hover:bg-white hover:text-gray-900 transition-colors">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+              <button className="w-full py-2 px-4 text-white hover:bg-white hover:text-gray-900 transition-colors rounded-md">
+                <ArrowLeft className="h-4 w-4 mr-2 inline" />
                 Back to login
-              </Button>
+              </button>
             </Link>
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function ForgotPasswordPage() {
                     type="email"
                     autoComplete="email"
                     placeholder="you@example.com"
-                    className="text-gray-900 bg-white border-gray-900 placeholder:text-gray-900"
+                    className="!text-gray-900 !bg-white !border-gray-900 placeholder:!text-gray-900"
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? "email-error" : undefined}
                     {...register("email")}
@@ -139,10 +139,10 @@ export default function ForgotPasswordPage() {
           </Card>
 
           <Link href="/login">
-            <Button variant="ghost" className="w-full text-white hover:bg-white hover:text-gray-900 transition-colors">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+            <button className="w-full py-2 px-4 text-white hover:bg-white hover:text-gray-900 transition-colors rounded-md">
+              <ArrowLeft className="h-4 w-4 mr-2 inline" />
               Back to login
-            </Button>
+            </button>
           </Link>
         </div>
       </div>
