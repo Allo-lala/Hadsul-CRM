@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { Header } from "@/components/dashboard/header"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Header } from "@/frontend/components/dashboard/header"
+import { Card, CardContent, CardHeader, CardTitle } from "@/frontend/components/ui/card"
+import { Badge } from "@/frontend/components/ui/badge"
+import { Button } from "@/frontend/components/ui/button"
+import { Avatar, AvatarFallback } from "@/frontend/components/ui/avatar"
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/frontend/components/ui/table"
 import {
   ArrowLeft,
   Mail,
@@ -25,8 +25,8 @@ import {
   Calendar,
   Loader2,
 } from "lucide-react"
-import { apiRequest } from "@/lib/api"
-import type { StaffMember, ClockRecord } from "@/lib/types"
+import { apiRequest } from "@/backend/lib/api"
+import type { StaffMember, ClockRecord } from "@/shared/types"
 
 type StaffProfile = StaffMember & {
   start_date?: string | null

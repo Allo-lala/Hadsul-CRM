@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import { verifyPassword } from '@/lib/password'
-import { signSession, getRedirectForRole, type DbUser } from '@/lib/auth'
+import { sql } from '@/backend/lib/db'
+import { verifyPassword } from '@/backend/lib/password'
+import { signSession, getRedirectForRole } from '@/backend/lib/auth'
+import type { DbUser } from '@/shared/types'
 
 const GENERIC_ERROR = 'Invalid email or password'
 const SESSION_COOKIE = 'session'

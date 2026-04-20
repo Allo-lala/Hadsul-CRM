@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import { validatePasswordStrength, hashPassword } from '@/lib/password'
-import { validateToken, consumeToken } from '@/lib/tokens'
+import { sql } from '@/backend/lib/db'
+import { validatePasswordStrength, hashPassword } from '@/backend/lib/password'
+import { validateToken, consumeToken } from '@/backend/lib/tokens'
 
 export async function POST(request: NextRequest) {
   let body: { token?: unknown; password?: unknown }

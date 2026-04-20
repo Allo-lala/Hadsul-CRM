@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Header } from "@/components/dashboard/header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
+import { Header } from "@/frontend/components/dashboard/header"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/frontend/components/ui/card"
+import { Button } from "@/frontend/components/ui/button"
+import { Input } from "@/frontend/components/ui/input"
+import { Label } from "@/frontend/components/ui/label"
+import { Badge } from "@/frontend/components/ui/badge"
+import { Textarea } from "@/frontend/components/ui/textarea"
 import {
   Dialog,
   DialogContent,
@@ -16,14 +16,14 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/frontend/components/ui/dialog"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/frontend/components/ui/select"
 import {
   Table,
   TableBody,
@@ -31,13 +31,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/frontend/components/ui/table"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/frontend/components/ui/dropdown-menu"
 import {
   Building2,
   Plus,
@@ -53,8 +53,8 @@ import {
   Bed,
   ImageIcon,
 } from "lucide-react"
-import { apiRequest } from "@/lib/api"
-import type { CareHome } from "@/lib/types"
+import { apiRequest } from "@/backend/lib/api"
+import type { CareHome } from "@/shared/types"
 
 const cqcRatingColors: Record<string, string> = {
   Outstanding: "bg-emerald-500/10 text-emerald-500",

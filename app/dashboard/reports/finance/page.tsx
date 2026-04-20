@@ -1,10 +1,10 @@
 "use client"
 
-import { Header } from "@/components/dashboard/header"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Header } from "@/frontend/components/dashboard/header"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/frontend/components/ui/card"
+import { Button } from "@/frontend/components/ui/button"
+import { Badge } from "@/frontend/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/frontend/components/ui/tabs"
 import {
   Table,
   TableBody,
@@ -12,14 +12,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/frontend/components/ui/table"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/frontend/components/ui/select"
 import {
   AreaChart,
   Area,

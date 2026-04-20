@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import { getCurrentUser, isSuperAdmin } from '@/lib/auth'
-import { unauthorized, forbidden, conflict, validationError, serverError } from '@/lib/api'
-import type { CareHome } from '@/lib/types'
+import { sql } from '@/backend/lib/db'
+import { getCurrentUser, isSuperAdmin } from '@/backend/lib/auth'
+import { unauthorized, forbidden, conflict, validationError, serverError } from '@/backend/lib/api'
+import type { CareHome } from '@/shared/types'
 
 // GET /api/care-homes — super_admin only
 // Returns all care homes with joined staff_count and clocked_in_count

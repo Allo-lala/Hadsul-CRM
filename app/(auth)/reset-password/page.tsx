@@ -8,10 +8,10 @@ import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Building2, ArrowLeft, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/frontend/components/ui/button"
+import { Input } from "@/frontend/components/ui/input"
+import { Label } from "@/frontend/components/ui/label"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/frontend/components/ui/card"
 
 // Mirror the server-side strength rules (Requirement 3.4)
 const resetPasswordSchema = z

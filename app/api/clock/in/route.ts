@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
-import { getCurrentUser } from '@/lib/auth'
-import { unauthorized, conflict, serverError } from '@/lib/api'
-import type { ClockRecord } from '@/lib/types'
+import { getDb } from '@/backend/lib/db'
+import { getCurrentUser } from '@/backend/lib/auth'
+import { unauthorized, conflict, serverError } from '@/backend/lib/api'
+import type { ClockRecord } from '@/shared/types'
 
 // POST /api/clock/in
 export async function POST(request: NextRequest) {

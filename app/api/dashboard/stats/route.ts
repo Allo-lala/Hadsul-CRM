@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import { getCurrentUser, isCareHomeAdmin } from '@/lib/auth'
-import { unauthorized, forbidden, serverError } from '@/lib/api'
-import type { DashboardStats } from '@/lib/types'
+import { sql } from '@/backend/lib/db'
+import { getCurrentUser, isCareHomeAdmin } from '@/backend/lib/auth'
+import { unauthorized, forbidden, serverError } from '@/backend/lib/api'
+import type { DashboardStats } from '@/shared/types'
 
 // GET /api/dashboard/stats
 // Returns KPI summary scoped by role.

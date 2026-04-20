@@ -1,19 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { Header } from "@/components/dashboard/header"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Header } from "@/frontend/components/dashboard/header"
+import { Card, CardContent, CardHeader, CardTitle } from "@/frontend/components/ui/card"
+import { Button } from "@/frontend/components/ui/button"
+import { Badge } from "@/frontend/components/ui/badge"
+import { Avatar, AvatarFallback, AvatarImage } from "@/frontend/components/ui/avatar"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
+} from "@/frontend/components/ui/select"
+import { ScrollArea, ScrollBar } from "@/frontend/components/ui/scroll-area"
 import {
   ChevronLeft,
   ChevronRight,
@@ -25,7 +25,7 @@ import {
   Download,
   Filter,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/backend/lib/utils"
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 const dates = ["24", "25", "26", "27", "28", "29", "30"]

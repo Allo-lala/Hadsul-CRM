@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import { validateToken } from '@/lib/tokens'
-import type { DbUser } from '@/lib/auth'
+import { sql } from '@/backend/lib/db'
+import { validateToken } from '@/backend/lib/tokens'
+import type { DbUser } from '@/shared/types'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)

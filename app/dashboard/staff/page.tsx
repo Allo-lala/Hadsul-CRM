@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { Header } from "@/components/dashboard/header"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Header } from "@/frontend/components/dashboard/header"
+import { Card, CardContent, CardHeader, CardTitle } from "@/frontend/components/ui/card"
+import { Input } from "@/frontend/components/ui/input"
+import { Button } from "@/frontend/components/ui/button"
+import { Badge } from "@/frontend/components/ui/badge"
+import { Avatar, AvatarFallback } from "@/frontend/components/ui/avatar"
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/frontend/components/ui/table"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,22 +23,22 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/frontend/components/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/frontend/components/ui/select"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+} from "@/frontend/components/ui/dialog"
+import { Label } from "@/frontend/components/ui/label"
 import {
   Search,
   Plus,
@@ -50,8 +50,8 @@ import {
   UserCheck,
   Loader2,
 } from "lucide-react"
-import { apiRequest } from "@/lib/api"
-import type { StaffMember } from "@/lib/types"
+import { apiRequest } from "@/backend/lib/api"
+import type { StaffMember } from "@/shared/types"
 
 // Standard role options per Requirement 3.6
 const STANDARD_ROLES = [

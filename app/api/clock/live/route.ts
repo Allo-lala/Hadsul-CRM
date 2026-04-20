@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import { getCurrentUser, isCareHomeAdmin } from '@/lib/auth'
-import { unauthorized, forbidden, serverError } from '@/lib/api'
-import type { ClockRecord } from '@/lib/types'
+import { sql } from '@/backend/lib/db'
+import { getCurrentUser, isCareHomeAdmin } from '@/backend/lib/auth'
+import { unauthorized, forbidden, serverError } from '@/backend/lib/api'
+import type { ClockRecord } from '@/shared/types'
 
 // GET /api/clock/live
 // Returns all open clock records for the admin's care home, joined with

@@ -1,15 +1,15 @@
 import { cookies } from 'next/headers'
-import { Header } from "@/components/dashboard/header"
-import { KPICards } from "@/components/dashboard/kpi-cards"
-import { ActivityFeed } from "@/components/dashboard/activity-feed"
-import { LiveAttendance } from "@/components/dashboard/live-attendance"
-import { QuickActions } from "@/components/dashboard/quick-actions"
-import { StaffDashboard } from "@/components/dashboard/staff-dashboard"
-import { getCurrentUser, isSuperAdmin, isStaff } from '@/lib/auth'
-import type { DashboardStats } from '@/lib/types'
-import type { ActivityEvent } from '@/components/dashboard/activity-feed'
-import type { CareHome } from '@/lib/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Header } from "@/frontend/components/dashboard/header"
+import { KPICards } from "@/frontend/components/dashboard/kpi-cards"
+import { ActivityFeed } from "@/frontend/components/dashboard/activity-feed"
+import { LiveAttendance } from "@/frontend/components/dashboard/live-attendance"
+import { QuickActions } from "@/frontend/components/dashboard/quick-actions"
+import { StaffDashboard } from "@/frontend/components/dashboard/staff-dashboard"
+import { getCurrentUser, isSuperAdmin, isStaff } from '@/backend/lib/auth'
+import type { DashboardStats } from '@/shared/types'
+import type { ActivityEvent } from '@/frontend/components/dashboard/activity-feed'
+import type { CareHome } from '@/shared/types'
+import { Card, CardContent, CardHeader, CardTitle } from '@/frontend/components/ui/card'
 import { Building2, Users, Clock } from 'lucide-react'
 
 async function fetchStats(cookieHeader: string): Promise<DashboardStats | null> {

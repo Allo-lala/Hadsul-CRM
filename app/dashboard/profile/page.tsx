@@ -1,23 +1,23 @@
 "use client"
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import { Header } from "@/components/dashboard/header"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
-import { Slider } from "@/components/ui/slider"
+import { Header } from "@/frontend/components/dashboard/header"
+import { Card, CardContent, CardHeader, CardTitle } from "@/frontend/components/ui/card"
+import { Button } from "@/frontend/components/ui/button"
+import { Input } from "@/frontend/components/ui/input"
+import { Label } from "@/frontend/components/ui/label"
+import { Badge } from "@/frontend/components/ui/badge"
+import { Avatar, AvatarFallback } from "@/frontend/components/ui/avatar"
+import { Separator } from "@/frontend/components/ui/separator"
+import { Slider } from "@/frontend/components/ui/slider"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/frontend/components/ui/dialog"
 import {
   Mail, Phone, Briefcase, Building2, Loader2, Pencil,
   CheckCircle, Upload, ZoomIn, RotateCcw,
 } from "lucide-react"
-import { apiRequest } from "@/lib/api"
+import { apiRequest } from "@/backend/lib/api"
 
 interface MyProfile {
   id: string

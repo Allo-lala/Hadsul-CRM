@@ -1,25 +1,25 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Header } from "@/components/dashboard/header"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { Header } from "@/frontend/components/dashboard/header"
+import { Button } from "@/frontend/components/ui/button"
+import { Input } from "@/frontend/components/ui/input"
+import { Label } from "@/frontend/components/ui/label"
+import { Textarea } from "@/frontend/components/ui/textarea"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/frontend/components/ui/dialog"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select"
+} from "@/frontend/components/ui/select"
 import { ChevronLeft, ChevronRight, Plus, Bell, Loader2, Pencil } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { apiRequest } from "@/lib/api"
+import { cn } from "@/backend/lib/utils"
+import { apiRequest } from "@/backend/lib/api"
 import type { CalendarEvent } from "@/app/api/calendar/route"
 import {
   MONTHS, toDateKey, sameDay, getWeekDates,
   YearView, MonthView, WeekView, DayView, ScheduleView,
-} from "@/components/dashboard/calendar-views"
+} from "@/frontend/components/dashboard/calendar-views"
 
 type ViewMode = "year" | "month" | "week" | "day" | "schedule"
 

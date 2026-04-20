@@ -1,21 +1,21 @@
 "use client"
 
 import { useState } from "react"
-import { Header } from "@/components/dashboard/header"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Header } from "@/frontend/components/dashboard/header"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/frontend/components/ui/card"
+import { Button } from "@/frontend/components/ui/button"
+import { Badge } from "@/frontend/components/ui/badge"
+import { Input } from "@/frontend/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/frontend/components/ui/avatar"
+import { Checkbox } from "@/frontend/components/ui/checkbox"
+import { ScrollArea } from "@/frontend/components/ui/scroll-area"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/frontend/components/ui/select"
 import {
   Plus,
   Search,
@@ -28,7 +28,7 @@ import {
   User,
   MapPin,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/backend/lib/utils"
 
 interface Task {
   id: string

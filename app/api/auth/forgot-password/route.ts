@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import { createPasswordResetToken } from '@/lib/tokens'
-import { sendPasswordResetEmail } from '@/lib/email'
-import type { DbUser } from '@/lib/auth'
+import { sql } from '@/backend/lib/db'
+import { createPasswordResetToken } from '@/backend/lib/tokens'
+import { sendPasswordResetEmail } from '@/backend/lib/email'
+import type { DbUser } from '@/shared/types'
 
 const UNIFORM_MESSAGE = 'If that email is registered, you will receive a reset link.'
 

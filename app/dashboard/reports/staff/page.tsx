@@ -1,11 +1,11 @@
 "use client"
 
-import { Header } from "@/components/dashboard/header"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Header } from "@/frontend/components/dashboard/header"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/frontend/components/ui/card"
+import { Button } from "@/frontend/components/ui/button"
+import { Badge } from "@/frontend/components/ui/badge"
+import { Progress } from "@/frontend/components/ui/progress"
+import { Avatar, AvatarFallback, AvatarImage } from "@/frontend/components/ui/avatar"
 import {
   Table,
   TableBody,
@@ -13,14 +13,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/frontend/components/ui/table"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/frontend/components/ui/select"
 import {
   BarChart,
   Bar,
@@ -43,7 +43,7 @@ import {
   Download,
   Star,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/backend/lib/utils"
 
 const completionData = [
   { name: "Sarah Johnson", initials: "SJ", tasks: 98, clockIn: 100, signatures: 95, overall: 97 },

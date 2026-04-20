@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
-import { getCurrentUser } from "@/lib/auth"
-import { getDb } from "@/lib/db"
-import { Sidebar } from "@/components/dashboard/sidebar"
+import { getCurrentUser } from "@/backend/lib/auth"
+import { getDb } from "@/backend/lib/db"
+import { Sidebar } from "@/frontend/components/dashboard/sidebar"
 
 export default async function DashboardLayout({
   children,

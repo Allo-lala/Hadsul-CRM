@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import { getCurrentUser, isCareHomeAdmin } from '@/lib/auth'
-import { unauthorized, forbidden, conflict, validationError, serverError } from '@/lib/api'
-import { createPasswordResetToken } from '@/lib/tokens'
-import { sendWelcomeEmail } from '@/lib/email'
-import type { StaffMember } from '@/lib/types'
+import { sql } from '@/backend/lib/db'
+import { getCurrentUser, isCareHomeAdmin } from '@/backend/lib/auth'
+import { unauthorized, forbidden, conflict, validationError, serverError } from '@/backend/lib/api'
+import { createPasswordResetToken } from '@/backend/lib/tokens'
+import { sendWelcomeEmail } from '@/backend/lib/email'
+import type { StaffMember } from '@/shared/types'
 
 // GET /api/staff
 // super_admin: returns all staff across all care homes

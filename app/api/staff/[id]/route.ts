@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
-import { getCurrentUser, isCareHomeAdmin } from '@/lib/auth'
-import { unauthorized, forbidden, notFound, validationError, serverError } from '@/lib/api'
-import type { StaffMember, ClockRecord } from '@/lib/types'
+import { getDb } from '@/backend/lib/db'
+import { getCurrentUser, isCareHomeAdmin } from '@/backend/lib/auth'
+import { unauthorized, forbidden, notFound, validationError, serverError } from '@/backend/lib/api'
+import type { StaffMember, ClockRecord } from '@/shared/types'
 
 // GET /api/staff/[id]
 // Admins: any staff in their care home. Staff: own profile only.

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import { getCurrentUser, isSuperAdmin } from '@/lib/auth'
-import { unauthorized, forbidden, notFound, validationError, serverError } from '@/lib/api'
-import type { CareHome } from '@/lib/types'
+import { sql } from '@/backend/lib/db'
+import { getCurrentUser, isSuperAdmin } from '@/backend/lib/auth'
+import { unauthorized, forbidden, notFound, validationError, serverError } from '@/backend/lib/api'
+import type { CareHome } from '@/shared/types'
 
 // GET /api/care-homes/[id] — super_admin only
 // Returns a single care home with assigned admin details

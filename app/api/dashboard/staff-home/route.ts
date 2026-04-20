@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
-import { getCurrentUser, isStaff } from '@/lib/auth'
-import { unauthorized, forbidden, serverError } from '@/lib/api'
+import { getDb } from '@/backend/lib/db'
+import { getCurrentUser, isStaff } from '@/backend/lib/auth'
+import { unauthorized, forbidden, serverError } from '@/backend/lib/api'
 
 export interface StaffDashboardData {
   // Hours

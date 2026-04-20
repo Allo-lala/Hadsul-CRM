@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@/lib/db'
-import { getCurrentUser, isCareHomeAdmin } from '@/lib/auth'
-import { unauthorized, forbidden, serverError } from '@/lib/api'
+import { sql } from '@/backend/lib/db'
+import { getCurrentUser, isCareHomeAdmin } from '@/backend/lib/auth'
+import { unauthorized, forbidden, serverError } from '@/backend/lib/api'
 
 export interface ActivityEvent {
   id: string

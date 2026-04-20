@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser, isCareHomeAdmin } from '@/lib/auth'
-import { createPasswordResetToken } from '@/lib/tokens'
-import { sendWelcomeEmail } from '@/lib/email'
-import { sql } from '@/lib/db'
+import { getCurrentUser, isCareHomeAdmin } from '@/backend/lib/auth'
+import { createPasswordResetToken } from '@/backend/lib/tokens'
+import { sendWelcomeEmail } from '@/backend/lib/email'
+import { sql } from '@/backend/lib/db'
 
 export async function POST(req: NextRequest) {
   try {

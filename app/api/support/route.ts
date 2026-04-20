@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
-import { getCurrentUser } from '@/lib/auth'
-import { unauthorized, validationError, serverError } from '@/lib/api'
+import { getDb } from '@/backend/lib/db'
+import { getCurrentUser } from '@/backend/lib/auth'
+import { unauthorized, validationError, serverError } from '@/backend/lib/api'
 
 export interface SupportMessage {
   id: string

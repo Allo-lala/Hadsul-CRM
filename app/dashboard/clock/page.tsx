@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { Header } from "@/components/dashboard/header"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
+import { Header } from "@/frontend/components/dashboard/header"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/frontend/components/ui/card"
+import { Button } from "@/frontend/components/ui/button"
+import { Badge } from "@/frontend/components/ui/badge"
+import { Avatar, AvatarFallback } from "@/frontend/components/ui/avatar"
+import { Progress } from "@/frontend/components/ui/progress"
 import {
   Table,
   TableBody,
@@ -14,10 +14,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/frontend/components/ui/table"
 import { Clock, LogIn, LogOut, Timer, TrendingUp, CheckCircle2, AlertTriangle } from "lucide-react"
-import { apiRequest } from "@/lib/api"
-import type { ClockRecord, StaffMember } from "@/lib/types"
+import { apiRequest } from "@/backend/lib/api"
+import type { ClockRecord, StaffMember } from "@/shared/types"
 
 function formatElapsed(seconds: number): string {
   const h = Math.floor(seconds / 3600)
