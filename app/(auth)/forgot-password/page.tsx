@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import Link from "next/link"
-import { Building2, ArrowLeft, CheckCircle, Loader2 } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import { Button } from "@/frontend/components/ui/button"
 import { Input } from "@/frontend/components/ui/input"
 import { Label } from "@/frontend/components/ui/label"
@@ -31,7 +31,7 @@ export default function ForgotPasswordPage() {
   })
 
   const onSubmit = async (data: ForgotPasswordFormValues) => {
-    // Always show confirmation regardless of result (Requirement 4.1)
+    // Always show confirmation regardless of result 
     await fetch("/api/auth/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -46,18 +46,15 @@ export default function ForgotPasswordPage() {
         <AnimatedLoginBackground />
         <div className="min-h-screen flex items-center justify-center p-6 relative">
           <div className="w-full max-w-md space-y-6">
-            <div className="flex items-center justify-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-emerald-500" />
-              </div>
-              <span className="text-xl font-bold text-white drop-shadow-lg">Hadsul CRM</span>
+            <div className="flex items-center justify-center gap-4 mb-2">
+              <img src="/logo.png" alt="Hadsul" className="h-60 w-60 rounded-lg object-contain" />
             </div>
 
-            <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-2xl">
+            <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-2xl -mt-16">
               <CardContent className="pt-6">
                 <div className="text-center space-y-4">
-                  <div className="h-16 w-16 mx-auto rounded-full bg-emerald-500/10 flex items-center justify-center">
-                    <CheckCircle className="h-8 w-8 text-emerald-500" />
+                  <div className="mx-auto w-24 h-24 flex items-center justify-center">
+                    <img src="/logo.png" alt="Hadsul" className="w-full h-full rounded-lg object-contain" />
                   </div>
                   <div>
                     <h2 className="text-xl font-semibold text-gray-900">Check your email</h2>
@@ -78,6 +75,13 @@ export default function ForgotPasswordPage() {
             </Link>
           </div>
         </div>
+        
+        {/* Copyright Footer */}
+        <footer className="fixed bottom-0 left-0 right-0 py-4 text-center">
+          <p className="text-sm text-white drop-shadow-lg">
+            © {new Date().getFullYear()} Hadsul Care Home CRM. All rights reserved.
+          </p>
+        </footer>
       </>
     )
   }
@@ -87,18 +91,15 @@ export default function ForgotPasswordPage() {
       <AnimatedLoginBackground />
       <div className="min-h-screen flex items-center justify-center p-6 relative">
         <div className="w-full max-w-md space-y-6">
-          <div className="flex items-center justify-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center">
-              <Building2 className="h-6 w-6 text-emerald-500" />
-            </div>
-            <span className="text-xl font-bold text-white drop-shadow-lg">Hadsul CRM</span>
+          <div className="flex items-center justify-center gap-4 mb-2">
+            <img src="/logo.png" alt="logo" className="h-60 w-60 rounded-lg object-contain" />
           </div>
 
-          <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-2xl">
+          <Card className="bg-white/95 backdrop-blur-sm border-white/20 shadow-2xl -mt-16">
             <CardHeader className="space-y-1 pb-4">
               <CardTitle className="text-2xl font-bold text-gray-900">Forgot password?</CardTitle>
               <CardDescription className="text-gray-600">
-                Enter your email address and we&apos;ll send you a reset link.
+                Enter your email address and you&apos;ll receive you a reset link.
               </CardDescription>
             </CardHeader>
 
@@ -122,7 +123,7 @@ export default function ForgotPasswordPage() {
                   )}
                 </div>
 
-                <Button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-600 text-white" disabled={isSubmitting}>
+                <Button type="submit" className="w-full text-white" style={{ backgroundColor: '#174731' }} disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -137,13 +138,20 @@ export default function ForgotPasswordPage() {
           </Card>
 
           <Link href="/login">
-            <Button variant="ghost" className="w-full text-white hover:bg-white/10">
+            <Button variant="ghost" className="w-full text-white hover:bg-white/80">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to login
             </Button>
           </Link>
         </div>
       </div>
+      
+      {/* Copyright Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 py-4 text-center">
+        <p className="text-sm text-white drop-shadow-lg">
+          © {new Date().getFullYear()} Hadsul Cre Home CRM. All rights reserved.
+        </p>
+      </footer>
     </>
   )
 }

@@ -43,7 +43,7 @@ export function AnimatedLoginBackground() {
         1000
       )
       camera.position.z = 400
-      camera.position.x = -400 // Move camera to the left so shapes appear on the right
+      camera.position.x = -200 // Move camera to the left so shapes appear on the right
 
       // Create object groups
       const circle = new THREE.Object3D()
@@ -105,12 +105,12 @@ export function AnimatedLoginBackground() {
       lights[0] = new THREE.DirectionalLight(0xffffff, 1)
       lights[0].position.set(1, 0, 0)
 
-      // Emerald green light (#10b981)
-      lights[1] = new THREE.DirectionalLight(0x10b981, 1)
+      // Emerald green light (#174731)
+      lights[1] = new THREE.DirectionalLight(0x174731, 1)
       lights[1].position.set(0.75, 1, 0.5)
 
-      // Beige light (#f5f5dc)
-      lights[2] = new THREE.DirectionalLight(0xf5f5dc, 1)
+      // Beige light (#e2d2b1)
+      lights[2] = new THREE.DirectionalLight(0xe2d2b1, 1)
       lights[2].position.set(-0.75, -1, 0.5)
 
       scene.add(lights[0])
@@ -159,7 +159,7 @@ export function AnimatedLoginBackground() {
       <div
         className="fixed inset-0 -z-20"
         style={{
-          background: 'linear-gradient(to bottom, #10b981 0%, #f5f5dc 100%)',
+          background: 'linear-gradient(to bottom, #002d10ff 0%, #011306ff 100%)',
         }}
       />
       {/* Three.js canvas container */}

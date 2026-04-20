@@ -60,13 +60,12 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center p-6 relative">
         <div className="w-full max-w-md">
           {/* Logo */}
-          <div className="flex items-center justify-center gap-3 mb-8">
-            <img src="/logo.png" alt="Hadsul" className="h-12 w-12 rounded-lg object-contain" />
-            <span className="text-xl font-semibold text-white drop-shadow-lg">CRM</span>
+          <div className="flex items-center justify-center gap-4 mb-2">
+            <img src="/logo.png" alt="Hadsul" className="h-60 w-60 rounded-lg object-contain" />
           </div>
 
           {/* Login Form */}
-          <div className="bg-white/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-2xl p-8">
+          <div className="bg-white/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-2xl p-8 -mt-16">
             <div className="mb-6">
               <h1 className="text-2xl font-semibold text-gray-900 mb-1">Sign in</h1>
               <p className="text-sm text-gray-600">Enter your credentials to continue</p>
@@ -148,7 +147,8 @@ export default function LoginPage() {
               {/* Submit */}
               <Button
                 type="submit"
-                className="w-full h-10 bg-emerald-500 hover:bg-emerald-600 text-white"
+                className="w-full h-10 text-white"
+                style={{ backgroundColor: '#02361fff' }}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
@@ -169,6 +169,13 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
+      
+      {/* Copyright Footer */}
+      <footer className="fixed bottom-0 left-0 right-0 py-4 text-center">
+        <p className="text-sm text-white drop-shadow-lg">
+          © {new Date().getFullYear()} Hadsul Care Home CRM. All rights reserved.
+        </p>
+      </footer>
     </>
   )
 }
