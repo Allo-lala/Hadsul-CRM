@@ -80,7 +80,7 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
-                  className="!text-gray-900 !bg-white !border-gray-900 placeholder:!text-gray-900"
+                  className="!text-gray-900 !bg-white !border-gray-900 placeholder:!text-gray-600"
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
                   {...register("email")}
@@ -110,7 +110,7 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="••••••••"
-                    className="pr-10 !text-gray-900 !bg-white !border-gray-900 placeholder:!text-gray-900"
+                    className="pr-10 !text-gray-900 !bg-white !border-gray-900 placeholder:!text-gray-600"
                     aria-invalid={!!errors.password}
                     aria-describedby={errors.password ? "password-error" : undefined}
                     {...register("password")}
@@ -174,7 +174,7 @@ export default function LoginPage() {
       {/* Copyright Footer */}
       <footer className="fixed bottom-0 left-0 right-0 py-4 text-center">
         <p className="text-sm text-white drop-shadow-lg">
-          © {new Date().getFullYear()} Hadsul Care Home CRM. All rights reserved.
+          © {new Date().getFullYear()} Hadsul Care Home CRM
         </p>
       </footer>
     </>

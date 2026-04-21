@@ -99,7 +99,7 @@ export default function ForgotPasswordPage() {
             <CardHeader className="space-y-1 pb-4">
               <CardTitle className="text-2xl font-bold text-gray-900">Forgot password?</CardTitle>
               <CardDescription className="text-gray-600">
-                Enter your email address and you&apos;ll receive you a reset link.
+                Enter your email address and you&apos;ll receive a reset link
               </CardDescription>
             </CardHeader>
 
@@ -112,7 +112,7 @@ export default function ForgotPasswordPage() {
                     type="email"
                     autoComplete="email"
                     placeholder="you@example.com"
-                    className="!text-gray-900 !bg-white !border-gray-900 placeholder:!text-gray-900"
+                    className="!text-gray-900 !bg-white !border-gray-900 placeholder:!text-gray-600"
                     aria-invalid={!!errors.email}
                     aria-describedby={errors.email ? "email-error" : undefined}
                     {...register("email")}
@@ -150,7 +150,7 @@ export default function ForgotPasswordPage() {
       {/* Copyright Footer */}
       <footer className="fixed bottom-0 left-0 right-0 py-4 text-center">
         <p className="text-sm text-white drop-shadow-lg">
-          © {new Date().getFullYear()} Hadsul Cre Home CRM. All rights reserved.
+          © {new Date().getFullYear()} Hadsul Care Home CRM
         </p>
       </footer>
     </>
