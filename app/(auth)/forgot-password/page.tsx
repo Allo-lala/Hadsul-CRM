@@ -79,7 +79,7 @@ export default function ForgotPasswordPage() {
         {/* Copyright Footer */}
         <footer className="fixed bottom-0 left-0 right-0 py-4 text-center">
           <p className="text-sm text-white drop-shadow-lg">
-            © {new Date().getFullYear()} Hadsul Care Home CRM. All rights reserved.
+            © {new Date().getFullYear()} Hadsul Care Home CRM
           </p>
         </footer>
       </>
